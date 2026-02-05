@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Categories</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .container { margin-top: 50px; }
+
+    .card {
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    table tbody tr:hover {
+      background-color: #f0f8ff;
+      cursor: pointer;
+    }
+
+    /* Remove blue link highlight */
+    a, a:focus, a:active, button:focus, button:active {
+      outline: none;
+      box-shadow: none;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Title And Back Button-->
+  <div class="d-flex justify-content-between align-items-center">
+    <h1>Manage Categories</h1>
+    <a th:href="@{/admin}" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
+
+  <!-- Alerts -->
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+  <!-- Add Category Form -->
+  <div class="card">
+    <form th:action="@{/admin/categories/add}" method="post" class="row g-3">
+      <div class="col-md-8">
+        <input type="text" class="form-control" name="name" placeholder="Category Name" required>
+      </div>
+      <div class="col-md-4">
+        <button type="submit" class="btn btn-success w-100">Add Category</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Categories Table -->
+  <div class="card">
+    <table class="table table-striped table-bordered table-hover bg-white">
+      <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Category Name</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="category : ${categories}">
+        <td th:text="${category.id}"></td>
+        <td th:text="${category.name}"></td>
+        <td class="d-flex gap-2">
+          <form th:action="@{'/admin/categories/delete/' + ${category.id}}" method="post"
+                onsubmit="return confirm('Are you sure you want to delete this category?');">
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>

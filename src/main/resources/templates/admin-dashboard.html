@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .container { margin-top: 50px; }
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    cursor: pointer;
+    height: 250px; /* fixed height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 30px; /* more padding inside */
+}
+.card-products { background-color: #e3f2fd; } /* light blue */
+.card-categories { background-color: #e8f5e9; } /* light green */
+.card-home { background-color: #fff3e0; } /* light orange */
+
+    .card:hover { transform: translateY(-5px); }
+
+    a { text-decoration: none; color: inherit; outline: none; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="mb-4">Admin Dashboard</h1>
+
+  <div class="row g-4">
+    <!-- Manage Products -->
+    <div class="card card-products p-4 text-center">
+      <a th:href="@{/admin/products}">
+        <div class="card p-4 text-center bg-white">
+          <h3>Manage Products</h3>
+          <p>Click here to add, edit, or delete products.</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- Manage Categories -->
+    <div class="card card-categories p-4 text-center">
+      <a th:href="@{/admin/categories}">
+        <div class="card p-4 text-center bg-white">
+          <h3>Manage Categories</h3>
+          <p>Click here to add or delete categories.</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- Home / Back button -->
+    <div class="card card-home p-4 text-center">
+      <a th:href="@{/}">
+        <div class="card p-4 text-center bg-white">
+          <h3>Home</h3>
+          <p>Click here to view the homepage.</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+

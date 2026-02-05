@@ -1,0 +1,165 @@
+package com.omar.ecommerce.controllers;
+
+import com.omar.ecommerce.dtos.CategoryRequest;
+import com.omar.ecommerce.dtos.ProductRequest;
+import com.omar.ecommerce.dtos.ProductResponse;
+import com.omar.ecommerce.services.CategoryService;
+import com.omar.ecommerce.services.ProductService;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+
+@Controller
+@RequestMapping("/admin")
+@AllArgsConstructor
+public class AdminController {
+
+    private final ProductService productService;
+    private final CategoryService categoryService;
+
+    //ADMIN VIEW PAGE
+    @GetMapping
+    public String adminDashboard() {
+        return "admin-dashboard";
+    }
+
+    /*
+      Products methods
+    */
+
+    @GetMapping("/products")
+    public String adminProducts(Model model, @RequestParam(required = false) String keyword) {
+
+        if (keyword != null && !keyword.isBlank()) {
+            model.addAttribute("products", productService.searchByName(keyword));
+        } else {
+            model.addAttribute("products", productService.findAll());
+        }
+
+        model.addAttribute("productRequest", new ProductRequest());
+        model.addAttribute("keyword", keyword); // keep value in search bar
+        model.addAttribute("categories", categoryService.findAll()); // <-- list of categories
+
+        return "admin-products"; // Thymeleaf template
+    }
+
+    @GetMapping("/products/edit/{id}")
+    public String editProduct(@PathVariable long id, Model model) {
+        ProductResponse product = productService.getResponseById(id);
+
+        ProductRequest productRequest = new ProductRequest();
+        productRequest.setName(product.getName());
+        productRequest.setPrice(product.getPrice());
+        productRequest.setCategoryId(product.getCategoryId());
+
+        model.addAttribute("productRequest", productRequest);
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("productId", id); // use this in form
+        return "edit-product";
+    }
+
+
+    @PostMapping("/products/add")
+    public String addProduct(@Valid @ModelAttribute ProductRequest request, BindingResult result, RedirectAttributes ra) {
+
+        if (result.hasErrors()) {
+            ra.addFlashAttribute("errors", result.getAllErrors());
+            return "redirect:/admin/products";
+        }
+
+        productService.create(request);
+        ra.addFlashAttribute("success", "Product added successfully!");
+
+        return "redirect:/admin/products";
+    }
+
+    @PostMapping("/products/delete/{id}")
+    public String deleteProduct(@PathVariable long id, RedirectAttributes ra) {
+        try {
+            productService.delete(id);
+            ra.addFlashAttribute("success", "Product deleted successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/products";
+    }
+
+    @PostMapping("/products/update/{id}")
+    public String updateProduct(@Valid @ModelAttribute ProductRequest productRequest,
+                                BindingResult result,
+                                @PathVariable long id,
+                                RedirectAttributes ra) {
+
+        if (result.hasErrors()) {
+            List<String> errors = result.getAllErrors()
+                    .stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .toList();
+            ra.addFlashAttribute("errors", errors);
+            return "redirect:/admin/products/edit/" + id;
+        }
+        try {
+            productService.update(id, productRequest);
+            ra.addFlashAttribute("success", "Product updated successfully!");
+
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/products/edit/" + id; // go back to edit form
+        }
+        return "redirect:/admin/products";
+    }
+
+    /*
+      Category methods
+    */
+
+    @GetMapping("/categories")
+    public String categories(Model model) {
+
+        model.addAttribute("categories", categoryService.findAll());
+
+        return "admin-categories";
+    }
+
+
+    @PostMapping("/categories/add")
+    public String addCategory(
+            @Valid @ModelAttribute CategoryRequest request,
+            BindingResult result,
+            RedirectAttributes ra
+    ) {
+        if (result.hasErrors()) {
+            ra.addFlashAttribute("error", "Invalid category name");
+            return "redirect:/admin/categories";
+        }
+
+        try {
+            categoryService.add(request);
+            ra.addFlashAttribute("success", "Category added");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/admin/categories";
+    }
+
+
+    @PostMapping("/categories/delete/{id}")
+    public String deleteCategory(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            categoryService.delete(id);
+            ra.addFlashAttribute("success", "Category deleted");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/admin/categories";
+    }
+}
