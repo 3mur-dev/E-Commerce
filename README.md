@@ -34,5 +34,6 @@ This project demonstrates a complete shopping platform, including product manage
 For ctntact:
 
 GitHub: 3mur-dev
+
 Email: 3mur1111@gmail.com
 
