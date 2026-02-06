@@ -1,71 +1,147 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Admin Dashboard - Omar's Shop</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+        theme: { extend: {
+            colors: {
+                primary: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' },
+                adminBlue: { 50: '#eff6ff', 500: '#1e40af', 600: '#1e3a8a', 700: '#1e293b' }
+            },
+            animation: {
+                'float': 'float 6s ease-in-out infinite',
+                'pulse-glow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'bounce-slow': 'bounce 2s infinite'
+            }
+        }}
+    }
+  </script>
+
   <style>
-    body { background-color: #f8f9fa; }
-    .container { margin-top: 50px; }
-
-.card {
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-    cursor: pointer;
-    height: 250px; /* fixed height */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 30px; /* more padding inside */
-}
-.card-products { background-color: #e3f2fd; } /* light blue */
-.card-categories { background-color: #e8f5e9; } /* light green */
-.card-home { background-color: #fff3e0; } /* light orange */
-
-    .card:hover { transform: translateY(-5px); }
-
-    a { text-decoration: none; color: inherit; outline: none; }
+    .glass-effect {
+        backdrop-filter: blur(40px);
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .glass-effect-dark {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .gradient-admin {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1d4ed8 100%);
+    }
+    .floating-shapes {
+        position: absolute; width: 100%; height: 100%; overflow: hidden; z-index: 0;
+    }
+    .shape {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 20s infinite linear;
+    }
+    .shape:nth-child(1) { width: 120px; height: 120px; top: 20%; left: 10%; animation-delay: 0s; }
+    .shape:nth-child(2) { width: 80px; height: 80px; top: 60%; right: 15%; animation-delay: 6s; }
+    .shape:nth-child(3) { width: 100px; height: 100px; bottom: 20%; left: 20%; animation-delay: 12s; }
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        33% { transform: translateY(-20px) rotate(120deg); }
+        66% { transform: translateY(10px) rotate(240deg); }
+    }
+    .card-hover {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.6, 1);
+    }
+    .card-hover:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
   </style>
 </head>
-<body>
 
-<div class="container">
-  <h1 class="mb-4">Admin Dashboard</h1>
+<body class="gradient-admin min-h-screen relative overflow-x-hidden">
+<!-- Floating Background -->
+<div class="floating-shapes">
+  <div class="shape"></div><div class="shape"></div><div class="shape"></div>
+</div>
 
-  <div class="row g-4">
-    <!-- Manage Products -->
-    <div class="card card-products p-4 text-center">
-      <a th:href="@{/admin/products}">
-        <div class="card p-4 text-center bg-white">
-          <h3>Manage Products</h3>
-          <p>Click here to add, edit, or delete products.</p>
-        </div>
-      </a>
-    </div>
-
-    <!-- Manage Categories -->
-    <div class="card card-categories p-4 text-center">
-      <a th:href="@{/admin/categories}">
-        <div class="card p-4 text-center bg-white">
-          <h3>Manage Categories</h3>
-          <p>Click here to add or delete categories.</p>
-        </div>
-      </a>
-    </div>
-
-    <!-- Home / Back button -->
-    <div class="card card-home p-4 text-center">
-      <a th:href="@{/}">
-        <div class="card p-4 text-center bg-white">
-          <h3>Home</h3>
-          <p>Click here to view the homepage.</p>
-        </div>
-      </a>
+<!-- Main Container -->
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 relative z-10">
+  <!-- Header -->
+  <div class="text-center mb-16">
+    <div class="inline-flex items-center gap-4 bg-white/20 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border border-white/30 mb-8">
+      <div class="w-16 h-16 bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-xl">
+        <i class="fas fa-crown text-2xl text-yellow-300"></i>
+      </div>
+      <div>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent drop-shadow-2xl">
+          Admin Dashboard
+        </h1>
+        <p class="text-xl text-white/90 font-semibold mt-2">Manage your store with ease</p>
+      </div>
     </div>
   </div>
+
+  <!-- Dashboard Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+
+    <!-- 🔥 Manage Products Card -->
+    <a th:href="@{/admin/products}" class="block group">
+      <div class="card-hover glass-effect rounded-3xl p-10 text-center h-[280px] flex flex-col items-center justify-center shadow-2xl border border-white/30 hover:shadow-4xl hover:border-primary-400/50 backdrop-blur-xl">
+        <div class="w-20 h-20 bg-gradient-to-br from-blue-400/30 to-blue-500/30 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 shadow-2xl group-hover:scale-110 transition-transform duration-500 border border-blue-400/40">
+          <i class="fas fa-boxes-stacked text-2xl text-blue-200 group-hover:text-blue-100"></i>
+        </div>
+        <h3 class="text-2xl md:text-3xl font-black text-white mb-4 bg-gradient-to-r from-blue-100 to-white/80 bg-clip-text text-transparent drop-shadow-lg">
+          Manage Products
+        </h3>
+        <p class="text-lg text-white/90 font-semibold max-w-xs leading-relaxed">
+          Add, edit, or delete products with our intuitive interface
+        </p>
+        <i class="fas fa-arrow-right text-2xl text-blue-300 mt-6 group-hover:translate-x-2 transition-all duration-300"></i>
+      </div>
+    </a>
+
+    <!-- 🔥 Manage Categories Card -->
+    <a th:href="@{/admin/categories}" class="block group">
+      <div class="card-hover glass-effect rounded-3xl p-10 text-center h-[280px] flex flex-col items-center justify-center shadow-2xl border border-white/30 hover:shadow-4xl hover:border-emerald-400/50 backdrop-blur-xl">
+        <div class="w-20 h-20 bg-gradient-to-br from-emerald-400/30 to-emerald-500/30 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 shadow-2xl group-hover:scale-110 transition-transform duration-500 border border-emerald-400/40">
+          <i class="fas fa-tags text-2xl text-emerald-200 group-hover:text-emerald-100"></i>
+        </div>
+        <h3 class="text-2xl md:text-3xl font-black text-white mb-4 bg-gradient-to-r from-emerald-100 to-white/80 bg-clip-text text-transparent drop-shadow-lg">
+          Manage Categories
+        </h3>
+        <p class="text-lg text-white/90 font-semibold max-w-xs leading-relaxed">
+          Organize products into categories for better navigation
+        </p>
+        <i class="fas fa-arrow-right text-2xl text-emerald-300 mt-6 group-hover:translate-x-2 transition-all duration-300"></i>
+      </div>
+    </a>
+
+    <!-- 🔥 Home / Back Card -->
+    <a th:href="@{/}" class="block group">
+      <div class="card-hover glass-effect rounded-3xl p-10 text-center h-[280px] flex flex-col items-center justify-center shadow-2xl border border-white/30 hover:shadow-4xl hover:border-orange-400/50 backdrop-blur-xl">
+        <div class="w-20 h-20 bg-gradient-to-br from-orange-400/30 to-orange-500/30 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 shadow-2xl group-hover:scale-110 transition-transform duration-500 border border-orange-400/40">
+          <i class="fas fa-house text-2xl text-orange-200 group-hover:text-orange-100"></i>
+        </div>
+        <h3 class="text-2xl md:text-3xl font-black text-white mb-4 bg-gradient-to-r from-orange-100 to-white/80 bg-clip-text text-transparent drop-shadow-lg">
+          Visit Store
+        </h3>
+        <p class="text-lg text-white/90 font-semibold max-w-xs leading-relaxed">
+          Return to the main store homepage and customer view
+        </p>
+        <i class="fas fa-arrow-right text-2xl text-orange-300 mt-6 group-hover:translate-x-2 transition-all duration-300"></i>
+      </div>
+    </a>
+  </div>
 </div>
+
+<!-- Footer -->
+<footer class="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center text-white/60 text-sm font-medium">
+  <p>© 2026 Omar's Shop - Admin Panel</p>
+</footer>
 </body>
 </html>
-

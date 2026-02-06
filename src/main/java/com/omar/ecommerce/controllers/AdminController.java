@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -68,14 +69,16 @@ public class AdminController {
 
 
     @PostMapping("/products/add")
-    public String addProduct(@Valid @ModelAttribute ProductRequest request, BindingResult result, RedirectAttributes ra) {
+    public String addProduct(@Valid @ModelAttribute ProductRequest request,
+                             BindingResult result, RedirectAttributes ra,
+                             @RequestParam(value = "image", required = false) MultipartFile image){
 
         if (result.hasErrors()) {
             ra.addFlashAttribute("errors", result.getAllErrors());
             return "redirect:/admin/products";
         }
 
-        productService.create(request);
+        productService.create(request, image);
         ra.addFlashAttribute("success", "Product added successfully!");
 
         return "redirect:/admin/products";

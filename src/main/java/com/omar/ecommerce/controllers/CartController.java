@@ -7,9 +7,8 @@ import com.omar.ecommerce.repositories.ProductRepository;
 import com.omar.ecommerce.repositories.UserRepository;
 import com.omar.ecommerce.services.CartService;
 import com.omar.ecommerce.services.OrderService;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -18,10 +17,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/cart")
@@ -36,17 +35,19 @@ public class CartController {
     private final OrderService orderService;
 
     @GetMapping
-    public String showCart(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        if (userDetails == null) return "redirect:/login"; // prevent null user
+    public String showCart(Authentication auth, Model model) {
+        if (auth == null || !auth.isAuthenticated()) return "redirect:/login";
 
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+
+        String username = userDetails.getUsername();
+        User user = userRepository.findByUsername(username).get();
 
         Cart cart = cartService.getOrCreateCart(user);
         cart.getUser().getId(); // force lazy load
 
         List<CartItem> items = cartItemRepository.findByCart(cart);
-
         BigDecimal cartTotal = cartService.calculateTotalPrice(cart);
 
         boolean hasOutOfStock = items.stream()
@@ -61,35 +62,36 @@ public class CartController {
     }
 
     @PostMapping("/add")
-    public String AddCart(@AuthenticationPrincipal UserDetails userDetails,
-                          @RequestParam("productId") long productId) {
-
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-
-        Product product = productRepository.findById(productId).orElseThrow();
+    public String addCart(Authentication auth, @RequestParam("productId") long productId) {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        String username = userDetails.getUsername();
+        User user = userRepository.findByUsername(username).get();
+        Product product = productRepository.findById(productId).get();
 
         CartItem cartItem = cartService.addToCart(product, user);
-
         return "redirect:/cart";
     }
 
     @PostMapping("/decrease")
-    public String Decrease(Model model, @AuthenticationPrincipal UserDetails userDetails,
-                           @RequestParam("productId") long productId) {
+    public String decrease(Authentication auth, @RequestParam("productId") long productId) {
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        String username = userDetails.getUsername();
+        User user = userRepository.findByUsername(username).get();
+        Product product = productRepository.findById(productId).get();
 
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Product product = productRepository.findById(productId).orElseThrow();
         cartService.decreaseQuantity(user, product);
         return "redirect:/cart";
     }
 
     @PostMapping("/checkout")
-    public String checkOut(@AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
-        // Just redirect - ThankController handles everything
-        return "redirect:/thank";
+    public String processCheckout(@AuthenticationPrincipal UserDetails principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        User user = userRepository.findByUsername(principal.getUsername()).get();
+        Order order = orderService.checkOut(user);  // ✅ Uses OrderService
+
+        return "redirect:/thank";  // ✅ Redirects to ThankController
     }
 }

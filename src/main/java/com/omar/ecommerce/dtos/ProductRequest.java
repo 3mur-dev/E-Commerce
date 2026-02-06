@@ -15,5 +15,4 @@ public class ProductRequest {
     private Long categoryId;
     @Min(value = 0, message = "Stock cannot be negative")
     private int stock;
-
 }

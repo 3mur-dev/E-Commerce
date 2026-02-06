@@ -20,12 +20,20 @@
               },
               animation: {
                 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              }
+              },
+              **imageRendering: {
+                'optimize-contrast': '-webkit-optimize-contrast',
+                'crisp-edges': 'crisp-edges',
+                'high-quality': 'high-quality'
+              }**
             }
           }
         }
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <style>
         .gradient-card {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -35,6 +43,13 @@
           background: rgba(255, 255, 255, 0.25);
           border: 1px solid rgba(255, 255, 255, 0.18);
         }
+        **.sharp-image {
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: crisp-edges;
+          image-rendering: high-quality;
+          image-rendering: -moz-crisp-edges;
+          image-rendering: pixelated 0.25;
+        }**
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
@@ -92,7 +107,7 @@
             </p>
         </div>
 
-        <!-- Search & Filters -->
+        <!-- Search & Functional Sort -->
         <div class="flex flex-col lg:flex-row gap-6 items-center justify-between mb-12">
 
             <!-- Search Form -->
@@ -104,17 +119,24 @@
                 <button type="submit" class="text-primary-600 font-bold text-lg px-4 hover:text-primary-700 transition-colors">Search</button>
             </form>
 
-            <!-- Filters & Sort -->
+            <!-- Functional Sort Dropdown + Results -->
             <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2 text-sm text-gray-600 bg-white/60 backdrop-blur-sm px-4 py-3 rounded-2xl border border-white/50">
+                <!-- Sort Form -->
+                <form th:action="@{/products}" method="get" class="flex items-center gap-2 text-sm text-gray-600 bg-white/60 backdrop-blur-sm px-4 py-3 rounded-2xl border border-white/50">
+                    <input type="hidden" name="keyword" th:value="${keyword}" />
+                    <input type="hidden" name="page" value="0" />
                     <span>Sort:</span>
-                    <select class="bg-transparent outline-none text-gray-800 font-medium">
-                        <option>Newest</option>
-                        <option>Price: Low-High</option>
-                        <option>Price: High-Low</option>
-                        <option>Best Selling</option>
+                    <select name="sort" onchange="this.form.submit()" class="bg-transparent outline-none text-gray-800 font-medium">
+                        <option value="" th:selected="${sort == null or sort == ''}">Newest</option>
+                        <option value="name" th:selected="${sort == 'name'}">Name A-Z</option>
+                        <option value="name,desc" th:selected="${sort == 'name,desc'}">Name Z-A</option>
+                        <option value="price" th:selected="${sort == 'price'}">Price Low-High</option>
+                        <option value="price,desc" th:selected="${sort == 'price,desc'}">Price High-Low</option>
+                        <option value="stock,desc" th:selected="${sort == 'stock,desc'}">Stock High-Low</option>
                     </select>
-                </div>
+                </form>
+
+                <!-- Results Count -->
                 <div class="text-lg font-semibold text-gray-700 bg-white/60 backdrop-blur-sm px-6 py-3 rounded-2xl border border-white/50"
                      th:text="'Showing ' + ${#lists.size(products)} + ' products'">
                     Showing 12 products
@@ -122,25 +144,30 @@
             </div>
         </div>
 
-        <!-- Products Grid -->
+        <!-- 🔥 PRODUCTS GRID - SHARP HIGH-QUALITY IMAGES -->
         <div th:if="${products != null and !#lists.isEmpty(products)}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 
+            <!-- 🔥 COMPLETE PRODUCT CARD WITH CRYSTAL CLEAR IMAGES -->
             <div th:each="product : ${products}"
                  class="group bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl hover:shadow-3xl border border-white/50 overflow-hidden transition-all duration-500 hover:-translate-y-4 hover:scale-[1.02]">
 
-                <!-- Product Image -->
+                <!-- 🔥 SHARP HIGH-QUALITY IMAGE CONTAINER -->
                 <div class="h-72 bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-blue-50 group-hover:to-indigo-50 overflow-hidden relative">
-                    <div class="h-full w-full flex items-center justify-center p-12">
-                        <i class="fas fa-box-open text-6xl text-gray-400 group-hover:text-primary-500 transition-all duration-500 group-hover:scale-110"></i>
-                    </div>
+
+                    <!-- CRYSTAL CLEAR PRODUCT IMAGE -->
+                    <img th:src="${product.imageUrl ?: '/images/default.webp'}"
+                         th:alt="${product.name}"
+                         class="w-full h-full object-cover object-center sharp-image transition-all duration-700 group-hover:scale-125
+                                loading='lazy' decoding='async'"
+                         style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; image-rendering: high-quality;">
 
                     <!-- Quick Actions -->
                     <div class="absolute top-6 right-6 space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-400 delay-200">
-                        <button class="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl hover:shadow-3xl flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-white transition-all duration-300 hover:scale-110 hover:rotate-[-5deg]">
-                            <i class="fas fa-heart text-xl"></i>
-                        </button>
-                        <button class="w-14 h-14 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-3xl shadow-2xl hover:shadow-3xl flex items-center justify-center hover:from-primary-700 hover:to-primary-800 transition-all duration-300 hover:scale-110 hover:rotate-[5deg]">
-                            <i class="fas fa-eye text-xl"></i>
+                        <button class="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl hover:shadow-3xl flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-white transition-all duration-300 hover:scale-110 hover:rotate-[-5deg]"
+                                th:attr="data-product-id=${product.id}"
+                                onclick="toggleFavorite(this)">
+                            <i class="fas fa-heart text-xl transition-all duration-300"
+                               th:classappend="${product.favorited} ? 'text-red-500 scale-110' : 'text-gray-600'"></i>
                         </button>
                     </div>
 
@@ -155,7 +182,7 @@
                     </div>
                 </div>
 
-                <!-- Product Info - NO CATEGORY (FIXED) -->
+                <!-- Product Info -->
                 <div class="p-8">
                     <h3 class="text-2xl font-bold text-gray-800 mb-6 group-hover:text-primary-600 transition-all duration-300 line-clamp-2"
                         th:text="${product.name}">
@@ -165,13 +192,13 @@
                     <!-- Price & Stock -->
                     <div class="flex items-center justify-between mb-8">
                         <div class="flex flex-col">
-                <span class="text-3xl font-bold text-primary-600 tracking-tight"
-                      th:text="${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">
-                  $99.99
-                </span>
+                            <span class="text-3xl font-bold text-primary-600 tracking-tight"
+                                  th:text="${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">
+                              $99.99
+                            </span>
                             <span class="text-sm text-gray-500" th:text="'Stock: ' + ${product.stock}">
-                  Stock: 12
-                </span>
+                              Stock: 12
+                            </span>
                         </div>
                     </div>
 
@@ -214,15 +241,50 @@
     </div>
 </section>
 
-<!-- Pagination -->
-<div class="py-20 bg-white/50 backdrop-blur-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center gap-3">
-        <button class="w-14 h-14 bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl hover:shadow-2xl hover:bg-white flex items-center justify-center text-gray-700 hover:text-primary-600 font-semibold transition-all duration-300 hover:scale-105">‹</button>
-        <button class="w-14 h-14 bg-primary-600 text-white font-bold rounded-3xl shadow-2xl hover:shadow-3xl flex items-center justify-center transition-all duration-300 hover:scale-105">1</button>
-        <button class="w-14 h-14 bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl hover:shadow-2xl hover:bg-white flex items-center justify-center text-gray-700 hover:text-primary-600 font-semibold transition-all duration-300 hover:scale-105">2</button>
-        <button class="w-14 h-14 bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl hover:shadow-2xl hover:bg-white flex items-center justify-center text-gray-700 hover:text-primary-600 font-semibold transition-all duration-300 hover:scale-105">3</button>
-        <span class="px-8 py-4 text-gray-600 font-semibold bg-white/50 backdrop-blur-sm rounded-3xl border border-white/50">...</span>
-        <button class="w-14 h-14 bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl hover:shadow-2xl hover:bg-white flex items-center justify-center text-gray-700 hover:text-primary-600 font-semibold transition-all duration-300 hover:scale-105">›</button>
+<!-- 🔥 Functional Pagination -->
+<div class="py-20 bg-white/50 backdrop-blur-sm" th:if="${totalPages > 1}">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center gap-2">
+
+        <!-- First Page -->
+        <a th:href="@{/products(keyword=${keyword}, page=0, sort=${sort})}"
+           class="w-14 h-14 bg-primary-600 text-white font-bold rounded-3xl shadow-2xl hover:shadow-3xl flex items-center justify-center transition-all duration-300 hover:scale-105">
+            <i class="fas fa-angle-double-left"></i>
+        </a>
+
+        <!-- Previous Page -->
+        <a th:href="@{/products(keyword=${keyword}, page=${currentPage - 1 > 0 ? currentPage - 1 : 0}, sort=${sort})}"
+           th:classappend="${currentPage == 0} ? 'opacity-50 cursor-not-allowed bg-gray-200' : 'bg-white/70 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:bg-white text-gray-700 hover:text-primary-600'"
+           class="w-14 h-14 rounded-3xl flex items-center justify-center transition-all duration-300 hover:scale-105">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+
+        <!-- Page Numbers -->
+        <div th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+             class="flex items-center justify-center">
+            <a th:href="@{/products(keyword=${keyword}, page=${i}, sort=${sort})}"
+               th:classappend="${i == currentPage} ? 'bg-primary-600 text-white font-bold shadow-2xl' : 'bg-white/70 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:bg-white text-gray-700 hover:text-primary-600'"
+               class="w-14 h-14 rounded-3xl font-semibold transition-all duration-300 hover:scale-105"
+               th:text="${i + 1}">1</a>
+        </div>
+
+        <!-- Next Page -->
+        <a th:href="@{/products(keyword=${keyword}, page=${currentPage + 1 < totalPages ? currentPage + 1 : totalPages - 1}, sort=${sort})}"
+           th:classappend="${currentPage >= totalPages - 1} ? 'opacity-50 cursor-not-allowed bg-gray-200' : 'bg-white/70 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:bg-white text-gray-700 hover:text-primary-600'"
+           class="w-14 h-14 rounded-3xl flex items-center justify-center transition-all duration-300 hover:scale-105">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+
+        <!-- Last Page -->
+        <a th:href="@{/products(keyword=${keyword}, page=${totalPages - 1}, sort=${sort})}"
+           class="w-14 h-14 bg-primary-600 text-white font-bold rounded-3xl shadow-2xl hover:shadow-3xl flex items-center justify-center transition-all duration-300 hover:scale-105">
+            <i class="fas fa-angle-double-right"></i>
+        </a>
+    </div>
+
+    <!-- Page Info -->
+    <div class="text-center mt-6 text-sm text-gray-600">
+        Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span>
+        (<span th:text="${#lists.size(products)}"></span> products)
     </div>
 </div>
 
@@ -239,26 +301,53 @@
 </footer>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fade-in');
-          }
-        });
-      });
-      document.querySelectorAll('.group').forEach(el => observer.observe(el));
+    async function toggleFavorite(btn) {
+      try {
+        const productId = btn.getAttribute('data-product-id');
 
-      const searchInput = document.querySelector('input[name="keyword"]');
-      if (searchInput) {
-        searchInput.addEventListener('focus', function() {
-          this.parentElement.classList.add('ring-2', 'ring-primary-500', 'shadow-2xl');
+        // read CSRF info
+        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+        const csrfToken = csrfTokenMeta ? csrfTokenMeta.content : null;
+        const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.content : 'X-CSRF-TOKEN';
+
+        const body = new URLSearchParams();
+        body.append('productId', productId);
+
+        const response = await fetch('/products/favorites/toggle', {
+          method: 'POST',
+          headers: Object.assign({
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }, csrfToken ? { [csrfHeader]: csrfToken } : {}),
+          body: body.toString()
         });
-        searchInput.addEventListener('blur', function() {
-          this.parentElement.classList.remove('ring-2', 'ring-primary-500', 'shadow-2xl');
-        });
+
+        if (response.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
+
+        const text = await response.text();
+
+        // change icon classes based on response
+        const heartIcon = btn.querySelector('i') || btn;
+        if (text === 'favorited') {
+          heartIcon.classList.remove('text-gray-600');
+          heartIcon.classList.add('text-red-500');
+          btn.setAttribute('aria-pressed', 'true');
+        } else if (text === 'unfavorited') {
+          heartIcon.classList.remove('text-red-500');
+          heartIcon.classList.add('text-gray-600');
+          btn.setAttribute('aria-pressed', 'false');
+        } else {
+          alert(text);
+        }
+
+      } catch (err) {
+        console.error('favorite toggle failed', err);
+        alert('Could not toggle favorite. See console for details.');
       }
-    });
+    }
 </script>
 
 <style>

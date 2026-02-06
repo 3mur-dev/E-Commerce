@@ -42,11 +42,7 @@ public class ThankController {
         String username = principal.getUsername();
         log.info("Looking for user: {}", username);
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> {
-                    log.error("User not found: {}", username);
-                    return new IllegalStateException("User not found");
-                });
+        User user = userRepository.findByUsername(username).get();
 
         // Get the LAST order created by this user
         Order order = orderRepository.findTopByUserOrderByIdDesc(user).orElse(null);
