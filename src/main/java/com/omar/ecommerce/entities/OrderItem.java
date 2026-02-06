@@ -3,6 +3,8 @@ package com.omar.ecommerce.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Data
 public class OrderItem {
@@ -18,5 +20,6 @@ public class OrderItem {
 
     private int quantity;
 
-    private double price;
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal price;
 }

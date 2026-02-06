@@ -6,7 +6,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -15,44 +17,69 @@ public class OrderService {
 
     private final CartService cartService;
     private final CartItemRepository cartItemRepository;
-    private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final CartRepository cartRepository;
 
     @Transactional
     public Order checkOut(User user) {
 
+        // Get user's cart
         Cart cart = cartService.getOrCreateCart(user);
-
         List<CartItem> items = cartItemRepository.findByCart(cart);
 
-        if (items.isEmpty()) return null;
-
-        Order order = new Order();
-        order.setUser(user);
-        order.setCreationTimestamp(LocalDateTime.now());
-        order.setStatus("pending");
-        order.setTotal(0.0);
-        orderRepository.save(order);
-
-        double total = 0;
-        for (CartItem item : items) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(order);
-            orderItem.setProduct(item.getProduct());
-            orderItem.setQuantity(item.getQuantity());
-            orderItem.setPrice(item.getProduct().getPrice());
-            orderItemRepository.save(orderItem);
-
-            total += item.getProduct().getPrice() * item.getQuantity();
+        if (items.isEmpty()) {
+            throw new IllegalStateException("Cart is empty");
         }
 
+        // Create order
+        Order order = new Order();
+        order.setUser(user);
+        order.setStatus(OrderStatus.PENDING);
+        order.setCreationTimestamp(LocalDateTime.now());
+        order.setItems(new ArrayList<>());
+        order.setTotal(BigDecimal.ZERO);
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        // Process each cart item
+        for (CartItem ci : items) {
+            Product product = productRepository.findById(ci.getProduct().getId())
+                    .orElseThrow(() -> new IllegalStateException("Product not found: " + ci.getProduct().getId()));
+
+            // Check stock
+            if (ci.getQuantity() > product.getStock()) {
+                throw new RuntimeException("Not enough stock for product: " + product.getName()
+                );
+            }
+
+            // Deduct stock
+            product.setStock(product.getStock() - ci.getQuantity());
+            productRepository.save(product); // part of transaction
+
+            // Create OrderItem
+            OrderItem oi = new OrderItem();
+            oi.setOrder(order);
+            oi.setProduct(product);
+            oi.setQuantity(ci.getQuantity());
+            oi.setPrice(product.getPrice());
+
+            // Add to order
+            order.getItems().add(oi);
+
+            // Update total
+            total = total.add(product.getPrice().multiply(BigDecimal.valueOf(ci.getQuantity())));
+        }
+
+        // Set total
         order.setTotal(total);
-        orderRepository.save(order);
 
-        // Properly clear cart items without affecting Cart
-        cart.getItems().clear(); // works if orphanRemoval=true
-        // OR: cartItemRepository.deleteByCart(cart);
+        // Save order (cascades to order items)
+        Order savedOrder = orderRepository.save(order);
 
-        return order;
+        // Clear cart items from DB
+        cartItemRepository.deleteAll(items);
+
+        return savedOrder;
     }
 }

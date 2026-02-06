@@ -37,6 +37,8 @@ public class ThankController {
             return "redirect:/login";
         }
 
+
+
         String username = principal.getUsername();
         log.info("Looking for user: {}", username);
 

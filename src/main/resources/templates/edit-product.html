@@ -12,11 +12,7 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       padding: 25px;
     }
-    a, a:focus, a:active, button:focus {
-      outline: none;
-      box-shadow: none;
-      text-decoration: none;
-    }
+    a, a:focus, a:active, button:focus { outline: none; box-shadow: none; text-decoration: none; }
   </style>
 </head>
 <body>
@@ -25,8 +21,8 @@
   <h1 class="mb-4">Edit Product</h1>
 
   <div class="card">
-    <!-- Use productId for form action -->
-    <form th:action="@{'/admin/products/update/' + ${productId}}" method="post">
+    <form th:action="@{'/admin/products/update/' + ${productId}}"
+          th:object="${productRequest}" method="post">
 
       <!-- Product Name -->
       <div class="mb-3">
@@ -45,6 +41,17 @@
                class="form-control"
                name="price"
                th:value="${productRequest.price}"
+               required>
+      </div>
+
+      <!-- Stock -->
+      <div class="mb-3">
+        <label class="form-label">Stock</label>
+        <input type="number"
+               class="form-control"
+               name="stock"
+               th:value="${productRequest.stock}"
+               min="0"
                required>
       </div>
 
@@ -68,9 +75,6 @@
       </div>
 
     </form>
-  </div>
-  <div th:if="${#fields.hasErrors('name')}" class="text-danger">
-    <p th:errors="*{name}"></p>
   </div>
 </div>
 

@@ -8,7 +8,9 @@ import com.omar.ecommerce.repositories.CartItemRepository;
 import com.omar.ecommerce.repositories.CartRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -18,6 +20,7 @@ public class CartService {
     private CartRepository cartRepository;
     private CartItemRepository cartItemRepository;
 
+    @Transactional
     public Cart getOrCreateCart(User user) {
         if (user == null) {
             throw new IllegalStateException("User must not be null when creating cart");
@@ -69,5 +72,34 @@ public class CartService {
                 cartItemRepository.delete(existingItem);
             }
         }
+    }
+    public BigDecimal calculateTotalPrice(Cart cart) {
+        if (cart == null || cart.getItems() == null) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal total = BigDecimal.ZERO;
+        for (CartItem item : cart.getItems()) {
+            // Ensure product and price are not null before calculating
+            if (item.getProduct() != null && item.getProduct().getPrice() != null) {
+                BigDecimal itemPrice = item.getProduct().getPrice();
+                // Multiply the item's price by its quantity
+                BigDecimal itemTotal = itemPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+                // Add this item's total to the running cart total
+                total = total.add(itemTotal);
+            }
+        }
+        return total;
+    }
+
+    // Alternative method using Java Streams
+    public BigDecimal calculateTotalPriceStreams(Cart cart) {
+        if (cart == null || cart.getItems() == null) {
+            return BigDecimal.ZERO;
+        }
+
+        return cart.getItems().stream()
+                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

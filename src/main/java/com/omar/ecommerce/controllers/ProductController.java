@@ -26,7 +26,7 @@ public class ProductController {
     private final CartRepository cartRepository;
 
 
-    // LIST ALL
+
     @GetMapping
     public String getAllProducts(Model model,
                                  @RequestParam(required = false) String keyword,
@@ -41,30 +41,23 @@ public class ProductController {
 
         // Cart badge logic
         int cartCount = 0;
-        if (userDetails != null) { // user is logged in
-            // Get the User entity
-            User user = userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow();
-
-            // Get or create cart
-            Cart cart = cartRepository.findByUser(user)
-                    .orElseGet(() -> {
-                        Cart newCart = new Cart();
-                        newCart.setUser(user);
-                        return cartRepository.save(newCart);
-                    });
-
-            // Count total items
-            List<CartItem> items = cartItemRepository.findByCart(cart);
+        List<CartItem> items = List.of(); // Default empty list
+        if (userDetails != null) {
+            User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
+            Cart cart = cartRepository.findByUser(user).orElseGet(() -> {
+                Cart newCart = new Cart();
+                newCart.setUser(user);
+                return cartRepository.save(newCart);
+            });
+            items = cartItemRepository.findByCart(cart);
             cartCount = items.stream().mapToInt(CartItem::getQuantity).sum();
-
-            // Optional: pass items if you want mini cart preview
-            model.addAttribute("items", items);
         }
 
-        model.addAttribute("cartCount", cartCount); // THIS IS THE BADGE NUMBER
-        model.addAttribute("productRequest", new ProductRequest());
+        // Add these attributes for the template
+        model.addAttribute("cartCount", cartCount);
+        model.addAttribute("items", items); // For potential mini-cart
         model.addAttribute("keyword", keyword);
+        model.addAttribute("productRequest", new ProductRequest());
 
         return "products";
     }

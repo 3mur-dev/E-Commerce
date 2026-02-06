@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Controller
@@ -45,10 +46,13 @@ public class CartController {
         cart.getUser().getId(); // force lazy load
 
         List<CartItem> items = cartItemRepository.findByCart(cart);
-        double cartTotal = items.stream()
-                .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
-                .sum();
 
+        BigDecimal cartTotal = cartService.calculateTotalPrice(cart);
+
+        boolean hasOutOfStock = items.stream()
+                .anyMatch(item -> item.getQuantity() > item.getProduct().getStock());
+
+        model.addAttribute("hasOutOfStock", hasOutOfStock);
         model.addAttribute("cartTotal", cartTotal);
         model.addAttribute("cart", cart);
         model.addAttribute("items", items);

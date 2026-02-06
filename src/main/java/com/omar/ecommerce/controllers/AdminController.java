@@ -58,6 +58,7 @@ public class AdminController {
         productRequest.setName(product.getName());
         productRequest.setPrice(product.getPrice());
         productRequest.setCategoryId(product.getCategoryId());
+        productRequest.setStock(product.getStock());
 
         model.addAttribute("productRequest", productRequest);
         model.addAttribute("categories", categoryService.findAll());
@@ -92,30 +93,29 @@ public class AdminController {
     }
 
     @PostMapping("/products/update/{id}")
-    public String updateProduct(@Valid @ModelAttribute ProductRequest productRequest,
+    public String updateProduct(@Valid @ModelAttribute("productRequest") ProductRequest productRequest,
                                 BindingResult result,
                                 @PathVariable long id,
+                                Model model,
                                 RedirectAttributes ra) {
 
         if (result.hasErrors()) {
-            List<String> errors = result.getAllErrors()
-                    .stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .toList();
-            ra.addFlashAttribute("errors", errors);
-            return "redirect:/admin/products/edit/" + id;
+            model.addAttribute("categories", categoryService.findAll());
+            model.addAttribute("productId", id);
+
+            return "edit-product";
         }
+
         try {
             productService.update(id, productRequest);
             ra.addFlashAttribute("success", "Product updated successfully!");
-
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/admin/products/edit/" + id; // go back to edit form
+            return "redirect:/admin/products/edit/" + id;
         }
+
         return "redirect:/admin/products";
     }
-
     /*
       Category methods
     */
@@ -161,5 +161,22 @@ public class AdminController {
         }
 
         return "redirect:/admin/categories";
+    }
+    @PostMapping("/increase-stock/{id}")
+    public String increaseStock(@PathVariable Long id, @RequestParam int amount) {
+        productService.increaseStock(id, amount);
+        return "redirect:/admin/products";
+    }
+
+    @PostMapping("/decrease-stock/{id}")
+    public String decreaseStock(@PathVariable Long id, @RequestParam int amount) {
+        productService.decreaseStock(id, amount);
+        return "redirect:/admin/products";
+    }
+
+    @PostMapping("/set-stock/{id}")
+    public String setStock(@PathVariable Long id, @RequestParam int quantity) {
+        productService.setStock(id, quantity);
+        return "redirect:/admin/products";
     }
 }
