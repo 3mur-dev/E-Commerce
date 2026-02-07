@@ -1,220 +1,156 @@
-E-Commerce 🛒✨
-[
-[
-[
-[
-[
+🧾 E-Commerce Web Application (Spring Boot)
 
-Full-stack e-commerce platform with Spring Boot 4.0, Hibernate 7.1.8, Thymeleaf & MySQL. Complete cart, checkout, authentication, and order management.
+A full-stack e-commerce web application built using Spring Boot, Thymeleaf, and MySQL.
+The project implements core online shopping features such as authentication, product management, cart handling, and order processing, with an admin panel for managing the system.
 
-<img src="https://github.com/3mur-dev/E-Commerce/blob/main/screenshot.png?raw=true" alt="E-Commerce Demo" width="800"/>
-✨ Features
-✅ User Authentication - Secure login/register with Spring Security
+This project was developed to practice backend architecture, database design, and secure authentication in a real-world application.
 
-🛒 Shopping Cart - Add/remove items, update quantities
+🚀 Features
+👤 User Features
 
-💳 Checkout Flow - Complete order processing with validation
+User registration and login with encrypted passwords (Spring Security + BCrypt)
 
-📦 Order Management - View order history and details
+Browse products by category
 
-🔍 Product Catalog - Browse products with rich details
+View product details
 
-⭐ Favorites - Save favorite products
+Add, update, and remove items from the shopping cart
 
-📱 Responsive UI - Mobile-first Thymeleaf templates
+Place orders and view order history
 
-🛡️ Production Ready - Transaction management, lazy loading fixes
+🛠️ Admin Features
 
-🚀 Quick Start
-bash
-# Clone the repo
-git clone https://github.com/3mur-dev/E-Commerce.git
-cd E-Commerce
+Create, update, and delete products
 
-# Start MySQL (docker)
-docker run -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=ecommerce mysql:8.0
+Manage categories
 
-# Run the app
-mvn spring-boot:run
-Open http://localhost:8080 🎉
+View and manage orders
 
-🛠️ Tech Stack
-Frontend	Backend	Database	Tools
-Thymeleaf 3.1.3	Spring Boot 4.0.0	MySQL 8.0.43	Maven
-Bootstrap 5	Spring Security 7.0	Hibernate 7.1.8	HikariCP
-HTML5/CSS3	Spring Data JPA 4.0		Lombok
-📋 Prerequisites
-Java 21 (JDK 21.0.9)
+Control product stock
 
-MySQL 8.0+ (or Docker)
+🧰 Tech Stack
+Layer	Technology
+Backend	Java, Spring Boot, Spring Security, JPA (Hibernate)
+Frontend	Thymeleaf, HTML, CSS, JavaScript
+Database	MySQL
+Build Tool	Maven
+🏗️ Project Architecture
 
-Maven 3.9+
+The application follows a layered architecture:
 
-Node.js (optional, for dev tools)
+Controller → Service → Repository → Database
 
-🗄️ Database Setup
-Option 1: Docker (Recommended)
-bash
-docker run -d \
-  --name ecommerce-mysql \
-  -p 3306:3306 \
-  -e MYSQL_ROOT_PASSWORD=root \
-  -e MYSQL_DATABASE=ecommerce \
-  mysql:8.0.43
-Option 2: Local MySQL
-sql
-CREATE DATABASE ecommerce;
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
-Update application.properties:
+Main Layers
 
-text
-spring.datasource.url=jdbc:mysql://localhost:3306/ecommerce?createDatabaseIfNotExist=true
-spring.datasource.username=root
-spring.datasource.password=root
-📁 Project Structure
-text
-E-Commerce/
-├── controllers/     # REST + MVC controllers
-├── entities/        # JPA entities (User, Product, Order, OrderItem)
-├── repositories/    # Spring Data JPA repositories
-├── services/        # Business logic
-├── templates/       # Thymeleaf HTML templates
-├── static/          # CSS/JS/images
-└── resources/
-    └── application.properties
-🎮 Usage
-1. Register/Login
-text
-POST /register - Create new user
-POST /login - Spring Security login
-2. Shopping Flow
-text
-GET /products - Browse catalog
-POST /cart/add/{productId} - Add to cart
-GET /cart - View cart
-POST /checkout - Complete purchase
-GET /thank - Order confirmation
-3. Admin Features
-text
-GET /admin/products - Manage products
-POST /admin/product - CRUD operations
-💾 Database Schema
-sql
-Users → Orders → OrderItems → Products
-    ↕         ↕          ↕
-favorites    items     product
-Key Relations:
+Controller Layer: Handles HTTP requests and returns Thymeleaf views.
 
-User 1 ↔ * Orders
+Service Layer: Contains business logic (cart handling, order processing, validation).
 
-Order 1 ↔ * OrderItems
+Repository Layer: Manages database operations using Spring Data JPA.
 
-OrderItem 1 ↔ 1 Product
+Entity Layer: Represents database tables as Java classes.
 
-🔧 Configuration
-Property	Default	Description
-server.port	8080	Web server port
-spring.jpa.hibernate.ddl-auto	validate	Schema validation
-spring.jpa.show-sql	false	Show SQL queries
-spring.datasource.hikari.maximum-pool-size	10	DB connection pool
-🧪 Testing
-bash
-# Unit tests
-mvn test
+Key Entities
 
-# Integration tests
-mvn test -Dtest=IntegrationTest
+User, Role
 
-# Coverage
-mvn jacoco:report
-🚀 Production Deployment
-bash
-# Build JAR
-mvn clean package -DskipTests
+Product, Category
 
-# Docker
-docker build -t ecommerce .
-docker run -p 8080:8080 ecommerce
-Docker Compose:
+Cart, CartItem
 
-text
-version: '3.8'
-services:
-  app:
-    build: .
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mysql
-  mysql:
-    image: mysql:8.0.43
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ecommerce
-📱 API Endpoints
-Method	Endpoint	Description	Auth
-GET	/products	List products	No
-POST	/cart/add/{id}	Add to cart	Yes
-GET	/cart	View cart	Yes
-POST	/checkout	Process order	Yes
-GET	/orders	Order history	Yes
-🐛 Troubleshooting
-Issue	Solution
-LazyInitializationException	Add @Transactional(readOnly = true) to controllers
-Access denied	Check spring.security.user.name/password
-Table doesn't exist	spring.jpa.hibernate.ddl-auto=update
-Connection refused	Start MySQL first
-🔮 Roadmap
- Shopping cart + checkout
+Order, OrderItem
 
- Order management + thank you page
+⚙️ Setup & Installation
+✅ Prerequisites
 
- Fix Hibernate lazy loading
+Java 17+
 
- Payment integration (Stripe/PayPal)
-
- REST API + Swagger docs
-
- Product search + categories
-
- Email notifications
-
- Admin dashboard
-
-🤝 Contributing
-Fork the project
-
-Create feature branch (git checkout -b feature/AmazingFeature)
-
-Commit changes (git commit -m 'Add some AmazingFeature')
-
-Push to branch (git push origin feature/AmazingFeature)
-
-Open Pull Request
-
-Code Style:
-
-4 spaces indentation
-
-@AllArgsConstructor Lombok
-
-@Transactional for services/controllers
-
-Thymeleaf: th:if, th:each, th:text
-
-📄 License
-This project is MIT licensed - see LICENSE file for details.
-
-🙌 Acknowledgments
-Built with ❤️ using:
-
-Spring Boot
-
-Thymeleaf
-
-Bootstrap
+Maven
 
 MySQL
 
+Git
 
-My Email: 3mur1111@gmail.com
+1️⃣ Clone the repository
+git clone https://github.com/3mur-dev/E-Commerce.git
+cd E-Commerce
+
+2️⃣ Create the database
+CREATE DATABASE ecommerce;
+
+3️⃣ Configure application properties
+
+Edit src/main/resources/application.properties:
+
+spring.datasource.url=jdbc:mysql://localhost:3306/ecommerce
+spring.datasource.username=root
+spring.datasource.password=YOUR_PASSWORD
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+server.port=8080
+
+4️⃣ Run the application
+mvn spring-boot:run
+
+
+Then open:
+
+http://localhost:8080
+
+🔐 Security
+
+Passwords are encrypted using BCrypt
+
+Authentication and authorization are handled by Spring Security
+
+Role-based access control (USER / ADMIN)
+
+🧠 Design Decisions
+
+Used Spring MVC + Thymeleaf instead of a REST API to simplify integration between backend and frontend.
+
+Applied JPA/Hibernate for ORM to reduce boilerplate SQL.
+
+Implemented a layered architecture to keep business logic separate from controllers.
+
+Used relational database modeling to handle orders, carts, and products efficiently.
+
+📈 Future Improvements
+
+REST API for frontend frameworks (React / Angular)
+
+JWT-based authentication
+
+Pagination and advanced search
+
+Payment gateway integration (Stripe / PayPal)
+
+Docker support
+
+Unit and integration tests
+
+DTOs and MapStruct for cleaner data transfer
+
+Better exception handling and logging
+
+👀 For Reviewers
+
+If you are reviewing this project, focus on:
+
+Order processing logic and transaction handling
+
+Cart and stock synchronization
+
+Security configuration
+
+Entity relationships and database design
+
+Service layer separation and code structure
+
+📬 Contact
+
+GitHub: https://github.com/3mur-dev
+
+Email: omar.dev@example.com
