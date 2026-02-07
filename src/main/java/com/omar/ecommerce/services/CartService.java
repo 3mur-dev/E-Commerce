@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
+@Transactional
 @AllArgsConstructor
 public class CartService {
 

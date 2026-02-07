@@ -44,46 +44,48 @@ public class ProductController {
                                  @RequestParam(required = false) String keyword,
                                  @RequestParam(defaultValue = "0") int page,
                                  @RequestParam(defaultValue = "") String sort,
-                                 @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails){
+                                 @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
 
         List<ProductResponse> products;
-        int currentPage = page;
-        int totalPages = 1;
-        long totalItems = 0;
 
         if (keyword != null && !keyword.isBlank()) {
-            // Search with sort + pagination
             products = productService.searchByName(keyword, sort, page);
         } else {
-            // All products with sort + pagination
             products = productService.findAll(sort, page);
         }
-
-        model.addAttribute("currentPage", currentPage);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("totalItems", totalItems);
 
         if (userDetails != null) {
             String username = userDetails.getUsername();
             List<Long> userFavorites = favoriteService.findUserFavorites(username);
-
             System.out.println(" USER: " + username + " FAVORITES: " + userFavorites.size());
 
             for (ProductResponse product : products) {
-                boolean isFavorited = userFavorites.contains(product.getId());
-                product.setFavorited(isFavorited);
+                product.setFavorited(userFavorites.contains(product.getId()));
             }
         }
+
 
         int cartCount = 0;
         List<CartItem> items = List.of();
         if (userDetails != null) {
-            User user = userRepository.findByUsername(userDetails.getUsername()).get();
+            String username = userDetails.getUsername();
+
+
+            User user = userRepository.findByUsername(username).orElseThrow();
+
+
             Cart cart = cartRepository.findByUser(user).orElseGet(() -> {
                 Cart newCart = new Cart();
                 newCart.setUser(user);
+
+
+                User cartUser = new User();
+                cartUser.setId(user.getId());
+                newCart.setUser(cartUser);
+
                 return cartRepository.save(newCart);
             });
+
             items = cartItemRepository.findByCart(cart);
             cartCount = items.stream().mapToInt(CartItem::getQuantity).sum();
         }
@@ -94,8 +96,6 @@ public class ProductController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("sort", sort);
         model.addAttribute("productRequest", new ProductRequest());
-
-        products.forEach(p -> System.out.println("Product " + p.getName() + " imageUrl: '" + p.getImageUrl() + "'"));
 
         return "products";
     }

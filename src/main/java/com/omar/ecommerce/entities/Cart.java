@@ -15,7 +15,7 @@ public class Cart {
     private Long id;
 
     @NotNull
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY)
     User user;
 
     @OneToMany(mappedBy="cart", cascade=CascadeType.ALL, orphanRemoval=true)

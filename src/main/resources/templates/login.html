@@ -56,11 +56,11 @@
         </div>
     </div>
 
-    <!-- 🔥 SINGLE LOGIN FORM -->
+    <!-- SINGLE LOGIN FORM -->
     <div th:class="${param.admin != null} ? 'w-full max-w-md' : 'w-full max-w-md'">
         <div class="glass-effect rounded-3xl p-8 lg:p-10 shadow-3xl hover:shadow-4xl transition-all duration-500 border border-white/30">
 
-            <!-- 🔥 DYNAMIC BANNERS -->
+            <!-- DYNAMIC BANNERS -->
             <div th:if="${param.fromCart}" class="mb-6 p-5 rounded-2xl bg-orange-500/15 border-2 border-orange-400/40 backdrop-blur-sm">
                 <div class="flex items-center gap-3 mb-2">
                     <i class="fas fa-shopping-cart text-xl text-orange-300"></i>
@@ -77,7 +77,7 @@
                 <p class="text-sm text-yellow-100">Enter admin credentials</p>
             </div>
 
-            <!-- 🔥 DYNAMIC TITLES -->
+            <!-- DYNAMIC TITLES -->
             <div class="text-center mb-8">
                 <div th:if="${param.admin != null}" class="w-20 h-20 bg-yellow-400/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl border border-yellow-400/30">
                     <i class="fas fa-crown text-2xl text-yellow-200"></i>

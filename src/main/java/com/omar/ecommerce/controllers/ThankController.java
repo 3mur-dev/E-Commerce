@@ -8,6 +8,7 @@ import com.omar.ecommerce.repositories.OrderRepository;
 import com.omar.ecommerce.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -44,7 +45,6 @@ public class ThankController {
 
         User user = userRepository.findByUsername(username).get();
 
-        // Get the LAST order created by this user
         Order order = orderRepository.findTopByUserOrderByIdDesc(user).orElse(null);
 
         if (order == null) {
@@ -55,7 +55,7 @@ public class ThankController {
         log.info("Found order {} for user {}", order.getId(), username);
 
         // Get order items
-        List<OrderItem> items = orderItemRepository.findByOrder(order);
+        List<OrderItem> items = orderItemRepository.findByOrderWithProduct(order);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         String formattedDate = order.getCreationTimestamp().format(formatter);

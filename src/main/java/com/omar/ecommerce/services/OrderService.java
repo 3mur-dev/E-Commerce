@@ -28,6 +28,13 @@ public class OrderService {
         Cart cart = cartService.getOrCreateCart(user);
         List<CartItem> items = cartItemRepository.findByCart(cart);
 
+        System.out.println("=== CHECKOUT DEBUG ===");
+        System.out.println("Cart ID: " + cart.getId());
+        System.out.println("Cart Items Count: " + items.size());
+        items.forEach(item ->
+                System.out.println("Item: " + item.getProduct().getName() + " Qty: " + item.getQuantity())
+        );
+
         if (items.isEmpty()) {
             throw new IllegalStateException("Cart is empty");
         }

@@ -16,8 +16,6 @@ public class User {
     @Column(unique = true)
     private String username;
 
-    private String role;
-
     @NotNull
     @Email
     @Column(unique = true)
@@ -26,4 +24,9 @@ public class User {
     @NotNull
     @Size(min = 6, max = 100)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
+
 }

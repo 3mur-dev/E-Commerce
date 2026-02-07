@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,20 +36,19 @@ public class CartController {
     private final OrderService orderService;
 
     @GetMapping
+    @Transactional
     public String showCart(Authentication auth, Model model) {
         if (auth == null || !auth.isAuthenticated()) return "redirect:/login";
 
-
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
-
         String username = userDetails.getUsername();
         User user = userRepository.findByUsername(username).get();
 
+
         Cart cart = cartService.getOrCreateCart(user);
-        cart.getUser().getId(); // force lazy load
+        BigDecimal cartTotal = cartService.calculateTotalPrice(cart);
 
         List<CartItem> items = cartItemRepository.findByCart(cart);
-        BigDecimal cartTotal = cartService.calculateTotalPrice(cart);
 
         boolean hasOutOfStock = items.stream()
                 .anyMatch(item -> item.getQuantity() > item.getProduct().getStock());

@@ -2,13 +2,14 @@ package com.omar.ecommerce.config;
 
 import com.omar.ecommerce.entities.User;
 import com.omar.ecommerce.repositories.UserRepository;
+import com.omar.ecommerce.services.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,8 +23,9 @@ import java.util.Optional;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+    private final CustomUserDetailsService customUserDetailsService;
 
-    // 🔥 CUSTOM SUCCESS HANDLER - User vs Admin Detection
+    // CUSTOM SUCCESS HANDLER - User vs Admin Detection
     @Bean
     public AuthenticationSuccessHandler successHandler() {
         return (request, response, authentication) -> {
@@ -32,7 +34,7 @@ public class SecurityConfig {
 
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                if ("ADMIN".equals(user.getRole())) {
+                if ("ADMIN".equals(user.getRole().name())) {
                     response.sendRedirect("/admin/products");
                 } else {
                     response.sendRedirect("/products");
@@ -42,7 +44,16 @@ public class SecurityConfig {
             }
         };
     }
-    // Security filter chain
+
+    // Authentication Provider (Spring Security 6.x)
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(customUserDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    // Security filter chain - MAIN CONFIG
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -50,11 +61,11 @@ public class SecurityConfig {
                         .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/products**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/cart/**", "/orders/**").authenticated()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .successHandler(successHandler())  // 🔥 User/Admin auto-redirect
+                        .successHandler(successHandler())
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -72,21 +83,9 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // UserDetailsService
+    // UserDetailsService bean
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> {
-            Optional<User> userOpt = userRepository.findByUsername(username);
-            if (userOpt.isEmpty()) {
-                throw new UsernameNotFoundException("User not found: " + username);
-            }
-            User user = userOpt.get();
-
-            return org.springframework.security.core.userdetails.User.builder()
-                    .username(user.getUsername())
-                    .password(user.getPassword())
-                    .roles(user.getRole())  // "USER" or "ADMIN"
-                    .build();
-        };
+        return customUserDetailsService;
     }
 }
