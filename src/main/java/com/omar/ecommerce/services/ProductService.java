@@ -85,12 +85,6 @@ public class ProductService {
     public ProductResponse create(ProductRequest request, MultipartFile image) {
         validateProductRequest(request);
 
-        // Validate image FIRST
-        if (image != null && !image.isEmpty()) {
-            if (!isValidImage(image)) {
-                throw new RuntimeException("Invalid image: Only JPEG/PNG allowed, max 5MB");
-            }
-        }
 
         Product product = new Product();
         product.setName(request.getName());
@@ -100,18 +94,17 @@ public class ProductService {
         // FIXED: Use absolute runtime path
         if (image != null && !image.isEmpty()) {
             try {
-                String uploadDir = getUploadDirectory();  // Returns /path/to/app/uploads/products/
-                String fileName = UUID.randomUUID() + getFileExtension(image);
+                String uploadDir = "uploads/products/";  // Simple like before
+                Files.createDirectories(Paths.get(uploadDir));  // Creates if needed
 
-                Path filePath = Paths.get(uploadDir, fileName);
-                Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+                Path filePath = Paths.get(uploadDir + fileName);
+                Files.copy(image.getInputStream(), filePath);
 
-                product.setImageUrl("/images/products/" + fileName);  // Static serving path
+                product.setImageUrl("/images/products/" + fileName);
             } catch (IOException e) {
-                throw new RuntimeException("Image upload failed: " + e.getMessage(), e);
+                throw new RuntimeException("Image upload failed", e);
             }
-        } else {
-            product.setImageUrl("/images/default.webp");
         }
 
         if (productRepository.existsByName(product.getName())) {
@@ -125,16 +118,6 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
 
         return mapToResponse(savedProduct);
-    }
-
-    @PostConstruct
-    public void init() {
-        try {
-            Files.createDirectories(Paths.get(getUploadDirectory()));
-            System.out.println(" Upload directory created: " + getUploadDirectory());
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to create upload directory", e);
-        }
     }
 
     // Add these helper methods

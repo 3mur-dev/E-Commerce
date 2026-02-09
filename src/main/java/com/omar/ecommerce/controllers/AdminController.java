@@ -107,17 +107,9 @@ public class AdminController {
     }
 
     private boolean isValidImage(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            return false;
-        }
-
-        String contentType = file.getContentType();
-        long maxSize = 5 * 1024 * 1024L; // 5MB
-
-        return contentType != null &&
-                (contentType.equals("image/jpeg") || contentType.equals("image/png")) &&
-                file.getSize() <= maxSize;
+        return file != null && !file.isEmpty() && file.getSize() <= 5 * 1024 * 1024L;
     }
+
 
 
     @PostMapping("/products/delete/{id}")
