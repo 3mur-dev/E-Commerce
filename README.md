@@ -185,15 +185,7 @@ JWT-based authentication
 
 Payment gateway integration (Stripe/PayPal)
 
-DTOs and MapStruct for cleaner architecture
-
 Unit & integration tests
-
-Caching (Redis)
-
-Advanced search and filtering
-
-CI/CD pipeline (GitHub Actions)
 
 👀 For Reviewers
 
