@@ -1,9 +1,15 @@
 package com.omar.ecommerce.controllers;
 
 import com.omar.ecommerce.dtos.CategoryRequest;
+import com.omar.ecommerce.dtos.OrderStats;
 import com.omar.ecommerce.dtos.ProductRequest;
 import com.omar.ecommerce.dtos.ProductResponse;
+import com.omar.ecommerce.entities.Order;
+import com.omar.ecommerce.entities.OrderStatus;
+import com.omar.ecommerce.repositories.OrderRepository;
+import com.omar.ecommerce.repositories.ProductRepository;
 import com.omar.ecommerce.services.CategoryService;
+import com.omar.ecommerce.services.OrderService;
 import com.omar.ecommerce.services.ProductService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -15,7 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/admin")
@@ -24,6 +32,7 @@ public class AdminController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final OrderService orderService;
 
     //ADMIN VIEW PAGE
     @GetMapping
@@ -181,5 +190,50 @@ public class AdminController {
     public String setStock(@PathVariable Long id, @RequestParam int quantity) {
         productService.setStock(id, quantity);
         return "redirect:/admin/products";
+    }
+
+    /*
+    Order Methods
+    */
+    @GetMapping("/orders")
+    public String getAllOrders(@RequestParam(required = false) String status, Model model) {
+        List<Order> orders;
+
+        if (status != null && !status.isEmpty()) {
+            orders = orderService.getOrdersByStatus(OrderStatus.valueOf(status));
+        } else {
+            orders = orderService.getAllOrders();
+        }
+
+        // Stats calculation
+        long totalShipped = orders.stream()
+                .filter(o -> o.getStatus() == OrderStatus.SHIPPED)
+                .count();
+        long totalPending = orders.stream()
+                .filter(o -> o.getStatus() == OrderStatus.PENDING)
+                .count();
+        BigDecimal totalRevenue = orders.stream()
+                .map(Order::getTotal)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        model.addAttribute("orders", orders);
+        model.addAttribute("totalShipped", totalShipped);
+        model.addAttribute("totalPending", totalPending);
+        model.addAttribute("totalRevenue", totalRevenue);
+        model.addAttribute("status", status); // keep filter selected
+
+        return "admin-orders";
+    }
+
+    @PostMapping("/orders/updateStatus")
+    public String updateOrderStatus(@RequestParam Long orderId,
+                                    @RequestParam OrderStatus status) {
+        Order order = orderService.getOrderById(orderId);
+        if (order != null) {
+            order.setStatus(status);
+            orderService.saveOrder(order);
+        }
+        return "redirect:/admin/orders";
     }
 }

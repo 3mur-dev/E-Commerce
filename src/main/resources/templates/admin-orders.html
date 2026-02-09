@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - Admin Dashboard - Omar's Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: {
+                    primary: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' },
+                    adminBlue: { 50: '#eff6ff', 500: '#1e40af', 600: '#1e3a8a', 700: '#1e293b' }
+                }
+            }}
+        }
+    </script>
+
+    <style>
+        .glass-effect {
+            backdrop-filter: blur(40px);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .glass-effect-dark {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gradient-admin {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1d4ed8 100%);
+        }
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.6, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .status-shipped {
+            background: rgba(34, 197, 94, 0.2) !important;
+            border-color: rgba(34, 197, 94, 0.4) !important;
+            color: #22c55e !important;
+        }
+        .status-pending {
+            background: rgba(251, 191, 36, 0.2) !important;
+            border-color: rgba(251, 191, 36, 0.4) !important;
+            color: #fbbc23 !important;
+        }
+        .status-cancelled {
+            background: rgba(239, 68, 68, 0.2) !important;
+            border-color: rgba(239, 68, 68, 0.4) !important;
+            color: #ef4444 !important;
+        }
+        .status-paid {
+            background: rgba(14, 165, 233, 0.2) !important;
+            border-color: rgba(14, 165, 233, 0.4) !important;
+            color: #0ea5e9 !important;
+        }
+        .status-delivered {
+            background: rgba(107, 114, 128, 0.2) !important;
+            border-color: rgba(107, 114, 128, 0.4) !important;
+            color: #6b7280 !important;
+        }
+        .status-badge {
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="gradient-admin min-h-screen relative overflow-x-hidden">
+<!-- Floating Background -->
+<div class="absolute w-full h-full overflow-hidden z-0">
+    <div class="absolute w-32 h-32 bg-white/10 rounded-full top-20 left-10 animate-[float_20s_linear_infinite]"></div>
+    <div class="absolute w-20 h-20 bg-white/10 rounded-full bottom-20 right-16 animate-[float_20s_linear_infinite]"></div>
+</div>
+
+<!-- Main Container -->
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 relative z-10">
+
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-4 bg-white/20 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border border-white/30 mb-8">
+            <div class="w-16 h-16 bg-white/30 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-xl">
+                <i class="fas fa-shopping-cart text-2xl text-emerald-300"></i>
+            </div>
+            <div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-emerald-400 via-blue-400 to-emerald-400 bg-clip-text text-transparent drop-shadow-2xl">
+                    Orders Management
+                </h1>
+                <p class="text-xl text-white/90 font-semibold mt-2">Monitor & manage all customer orders</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="max-w-7xl mx-auto mb-8 flex justify-end">
+        <form th:action="@{/admin/orders}" method="get">
+            <select name="status" onchange="this.form.submit()"
+                    class="glass-effect px-4 py-2 rounded-2xl text-white bg-white/5 border border-white/20 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <option value="" th:selected="${status == null || status == ''}">All Status</option>
+                <option value="PENDING" th:selected="${status == 'PENDING'}">Pending</option>
+                <option value="PAID" th:selected="${status == 'PAID'}">Paid</option>
+                <option value="SHIPPED" th:selected="${status == 'SHIPPED'}">Shipped</option>
+                <option value="DELIVERED" th:selected="${status == 'DELIVERED'}">Delivered</option>
+                <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">Cancelled</option>
+            </select>
+        </form>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 max-w-6xl mx-auto">
+        <div class="glass-effect rounded-3xl p-8 text-center card-hover shadow-2xl">
+            <div class="w-16 h-16 bg-gradient-to-br from-emerald-400/30 to-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl border border-emerald-400/40">
+                <i class="fas fa-check-circle text-2xl text-emerald-200"></i>
+            </div>
+            <p class="text-emerald-100 text-sm font-semibold uppercase tracking-wide mb-2">Shipped</p>
+            <p class="text-3xl font-black text-white" th:text="${totalShipped}">0</p>
+        </div>
+        <div class="glass-effect rounded-3xl p-8 text-center card-hover shadow-2xl">
+            <div class="w-16 h-16 bg-gradient-to-br from-amber-400/30 to-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl border border-amber-400/40">
+                <i class="fas fa-clock text-2xl text-amber-200"></i>
+            </div>
+            <p class="text-amber-100 text-sm font-semibold uppercase tracking-wide mb-2">Pending</p>
+            <p class="text-3xl font-black text-white" th:text="${totalPending}">0</p>
+        </div>
+        <div class="glass-effect rounded-3xl p-8 text-center card-hover shadow-2xl">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-400/30 to-blue-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl border border-blue-400/40">
+                <i class="fas fa-dollar-sign text-2xl text-blue-200"></i>
+            </div>
+            <p class="text-blue-100 text-sm font-semibold uppercase tracking-wide mb-2">Total Revenue</p>
+            <p class="text-3xl font-black text-white">$<span th:text="${totalRevenue}">0</span></p>
+        </div>
+        <div class="glass-effect rounded-3xl p-8 text-center card-hover shadow-2xl">
+            <div class="w-16 h-16 bg-gradient-to-br from-purple-400/30 to-purple-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl border border-purple-400/40">
+                <i class="fas fa-shopping-bag text-2xl text-purple-200"></i>
+            </div>
+            <p class="text-purple-100 text-sm font-semibold uppercase tracking-wide mb-2">Total Orders</p>
+            <p class="text-3xl font-black text-white" th:text="${orders?.size()}">0</p>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="max-w-7xl mx-auto">
+        <div class="glass-effect-dark rounded-3xl p-8 shadow-2xl border border-white/10">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                    <tr class="text-white/60 uppercase tracking-wider text-xs">
+                        <th class="px-6 py-4 text-left font-bold">Order</th>
+                        <th class="px-6 py-4 text-left font-bold">Customer</th>
+                        <th class="px-6 py-4 text-right font-bold">Total</th>
+                        <th class="px-6 py-4 text-center font-bold">Status</th>
+                        <th class="px-6 py-4 text-right font-bold">Date</th>
+                        <th class="px-6 py-4 text-right font-bold">Items</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/10">
+                    <tr th:each="order : ${orders}" class="hover:bg-white/5 transition-colors group">
+                        <td class="px-6 py-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 glass-effect rounded-2xl flex items-center justify-center text-xs font-bold text-white border border-white/20"
+                                     th:text="'#' + ${order.id}">123</div>
+                                <div>
+                                    <p class="font-semibold text-white" th:text="'#' + ${order.id}">Order #123</p>
+                                    <p class="text-white/60 text-xs">Order placed</p>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-6 py-6">
+                            <p class="font-semibold text-white" th:text="${order.user?.email} ?: 'Customer'">Sarah Johnson</p>
+                        </td>
+
+                        <td class="px-6 py-6 text-right">
+                            <p class="text-2xl font-black text-emerald-400"
+                               th:text="'$' + ${order.total}">0</p>
+                        </td>
+
+                        <td class="px-6 py-6 text-center">
+                            <form th:action="@{/admin/orders/updateStatus}" method="post">
+                                <input type="hidden" name="orderId" th:value="${order.id}" />
+                                <select name="status"
+                                        class="status-badge inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold mx-auto cursor-pointer"
+                                        th:classappend="'status-' + ${order.status.name().toLowerCase()}"
+                                        onchange="this.form.submit()">
+                                    <option value="PENDING" th:selected="${order.status.name() == 'PENDING'}">Pending</option>
+                                    <option value="PAID" th:selected="${order.status.name() == 'PAID'}">Paid</option>
+                                    <option value="SHIPPED" th:selected="${order.status.name() == 'SHIPPED'}">Shipped</option>
+                                    <option value="DELIVERED" th:selected="${order.status.name() == 'DELIVERED'}">Delivered</option>
+                                    <option value="CANCELLED" th:selected="${order.status.name() == 'CANCELLED'}">Cancelled</option>
+                                </select>
+                            </form>
+                        </td>
+
+                        <td class="px-6 py-6 text-right">
+                            <p class="text-white/80" th:text="${#temporals.format(order.creationTimestamp, 'MMM dd, yyyy')}">Feb 09, 2026</p>
+                            <p class="text-white/50 text-xs" th:text="${#temporals.format(order.creationTimestamp, 'HH:mm')}">10:04 AM</p>
+                        </td>
+
+                        <td class="px-6 py-6 text-right">
+                                <span class="glass-effect px-3 py-1 rounded-full text-xs font-bold text-white border border-white/20"
+                                      th:text="${#lists.size(order.items)} + ' items'">3 items</span>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${orders == null or orders.isEmpty()}" class="h-48">
+                        <td colspan="6" class="text-center py-12">
+                            <div class="glass-effect rounded-3xl p-12 mx-auto max-w-md">
+                                <i class="fas fa-inbox text-5xl text-white/30 mb-6"></i>
+                                <h3 class="text-2xl font-black text-white mb-2">No Orders Yet</h3>
+                                <p class="text-white/60 text-lg">Your store hasn't received any orders.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-16 mb-20">
+        <a th:href="@{/admin}" class="block">
+            <div class="glass-effect rounded-3xl p-8 text-center card-hover shadow-2xl h-[160px] flex flex-col items-center justify-center">
+                <i class="fas fa-arrow-left text-3xl text-primary-300 mb-4"></i>
+                <h3 class="text-xl font-black text-white">Back to Dashboard</h3>
+            </div>
+        </a>
+        <a th:href="@{/admin/products}" class="block">
+            <div class="glass-effect rounded-3xl p-8 text-center card-hover shadow-2xl h-[160px] flex flex-col items-center justify-center">
+                <i class="fas fa-boxes text-3xl text-blue-300 mb-4"></i>
+                <h3 class="text-xl font-black text-white">Manage Products</h3>
+            </div>
+        </a>
+        <a th:href="@{/admin/categories}" class="block">
+            <div class="glass-effect rounded-3xl p-8 text-center card-hover shadow-2xl h-[160px] flex flex-col items-center justify-center">
+                <i class="fas fa-tags text-3xl text-emerald-300 mb-4"></i>
+                <h3 class="text-xl font-black text-white">Manage Categories</h3>
+            </div>
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center text-white/60 text-sm font-medium">
+        <p>© 2026 Omar's Shop - Orders Management</p>
+    </footer>
+</div>
+</body>
+</html>

@@ -16,16 +16,16 @@ public class MessageService {
     @Transactional // Ensures database integrity
     public Message save(MessageRequest request) {
 
-        // 1. Map Request DTO to Entity
+        // Map Request DTO to Entity
         Message message = new Message();
         message.setName(request.getName());
         message.setEmail(request.getEmail());
         message.setMessage(request.getMessage());
-        // 2. Save the entity
-        // The @CreationTimestamp in your entity will trigger here
+
+        // Save the entity
         Message savedMessage = repository.save(message);
 
-        // 3. Return the saved object so you have access to 'id' and 'createdAt'
+        // Return the saved object so you have access to 'id' and 'createdAt'
         return savedMessage;
 
     }

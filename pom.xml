@@ -96,6 +96,13 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+<!-- postgresql-DB -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
     </dependencies>
 
     <!-- ===================== -->

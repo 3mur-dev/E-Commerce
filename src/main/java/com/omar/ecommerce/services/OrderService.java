@@ -1,5 +1,6 @@
 package com.omar.ecommerce.services;
 
+import com.omar.ecommerce.dtos.OrderStats;
 import com.omar.ecommerce.entities.*;
 import com.omar.ecommerce.repositories.*;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -88,5 +90,44 @@ public class OrderService {
         cartItemRepository.deleteAll(items);
 
         return savedOrder;
+    }
+
+    public List<Order> findByUser(User user) {
+        return orderRepository.findByUserId(user.getId());
+    }
+
+    public OrderStats getOrderStats() {
+        // Fetch orders along with user and items to avoid lazy loading
+        List<Order> orders = orderRepository.findAllWithUserAndItems();
+
+        long totalShipped = orders.stream()
+                .filter(o -> o.getStatus() == OrderStatus.SHIPPED)
+                .count();
+
+        long totalPending = orders.stream()
+                .filter(o -> o.getStatus() == OrderStatus.PENDING)
+                .count();
+
+        BigDecimal totalRevenue = orders.stream()
+                .map(Order::getTotal)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new OrderStats(orders, totalShipped, totalPending, totalRevenue);
+    }
+
+    public Order getOrderById(Long id) {
+        return orderRepository.findById(id).orElse(null);
+    }
+
+    public void saveOrder(Order order) {
+        orderRepository.save(order);
+    }
+    public List<Order> getOrdersByStatus(OrderStatus status) {
+        return orderRepository.findByStatus(status);
+    }
+    public List<Order> getAllOrders() {
+        // Use your repository method that fetches orders with users and items to avoid lazy loading
+        return orderRepository.findAllWithUserAndItems();
     }
 }

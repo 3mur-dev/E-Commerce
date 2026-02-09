@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Product</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .container { margin-top: 50px; }
+    .card {
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 25px;
+    }
+    a, a:focus, a:active, button:focus { outline: none; box-shadow: none; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="mb-4">Edit Product</h1>
+
+  <div class="card">
+    <form th:action="@{'/admin/products/update/' + ${productId}}"
+          th:object="${productRequest}" method="post">
+
+      <!-- Product Name -->
+      <div class="mb-3">
+        <label class="form-label">Product Name</label>
+        <input type="text"
+               class="form-control"
+               name="name"
+               th:value="${productRequest.name}"
+               required>
+      </div>
+
+      <!-- Price -->
+      <div class="mb-3">
+        <label class="form-label">Price</label>
+        <input type="number" step="0.01"
+               class="form-control"
+               name="price"
+               th:value="${productRequest.price}"
+               required>
+      </div>
+
+      <!-- Stock -->
+      <div class="mb-3">
+        <label class="form-label">Stock</label>
+        <input type="number"
+               class="form-control"
+               name="stock"
+               th:value="${productRequest.stock}"
+               min="0"
+               required>
+      </div>
+
+      <!-- Category -->
+      <div class="mb-3">
+        <label class="form-label">Category</label>
+        <select class="form-select" name="categoryId" required>
+          <option value="">-- Select Category --</option>
+          <option th:each="cat : ${categories}"
+                  th:value="${cat.id}"
+                  th:text="${cat.name}"
+                  th:selected="${cat.id == productRequest.categoryId}">
+          </option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a th:href="@{/admin/products}" class="btn btn-secondary">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

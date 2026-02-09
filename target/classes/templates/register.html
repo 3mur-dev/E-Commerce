@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Omar's Shop</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                animation: { 'float': 'float 6s ease-in-out infinite', 'pulse-glow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
+            }
+        }
+    }
+  </script>
+  <style>
+    .glass-effect { backdrop-filter: blur(40px); background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.2); }
+    .glass-effect-dark { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .floating-shapes { position: absolute; width: 100%; height: 100%; overflow: hidden; z-index: 0; }
+    .shape { position: absolute; background: rgba(255, 255, 255, 0.1); border-radius: 50%; animation: float 15s infinite linear; }
+    .shape:nth-child(1) { width: 100px; height: 100px; top: 15%; left: 5%; animation-delay: 0s; }
+    .shape:nth-child(2) { width: 150px; height: 150px; top: 70%; right: 10%; animation-delay: 4s; }
+    .shape:nth-child(3) { width: 80px; height: 80px; bottom: 15%; left: 25%; animation-delay: 8s; }
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        33% { transform: translateY(-30px) rotate(120deg); }
+        66% { transform: translateY(15px) rotate(240deg); }
+    }
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden">
+
+<!-- Floating Background -->
+<div class="floating-shapes absolute inset-0 pointer-events-none">
+  <div class="shape"></div>
+  <div class="shape"></div>
+  <div class="shape"></div>
+</div>
+
+<div class="w-full max-w-md relative z-10">
+  <div class="glass-effect rounded-3xl p-10 shadow-3xl border border-white/20">
+
+    <!-- Logo / Header -->
+    <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+      <i class="fas fa-user-plus text-2xl text-white"></i>
+    </div>
+    <h2 class="text-3xl font-black bg-gradient-to-r from-white via-blue-50 to-white/80 bg-clip-text text-transparent mb-4 text-center">
+      Create Account
+    </h2>
+    <p class="text-white/80 text-center mb-6">Sign up to start shopping at Omar's Shop</p>
+
+    <!-- Error / Success Messages -->
+    <div th:if="${error}" class="mb-6 p-4 rounded-2xl bg-red-500/20 border border-red-400/40 text-red-100 text-sm animate-pulse">
+      <i class="fas fa-exclamation-circle mr-2"></i>
+      <span th:text="${error}"></span>
+    </div>
+    <div th:if="${success}" class="mb-6 p-4 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-100 text-sm">
+      <i class="fas fa-check-circle mr-2"></i>
+      <span th:text="${success}"></span>
+    </div>
+
+    <!-- Registration Form -->
+    <form th:action="@{/register}" method="post" class="space-y-6">
+
+      <div class="relative">
+        <label class="block text-white/95 font-bold mb-2 flex items-center gap-2">
+          <i class="fas fa-user text-blue-50"></i>
+          Username
+        </label>
+        <input type="text" name="username" required placeholder="Enter username"
+               class="w-full pl-12 pr-5 py-4 rounded-2xl glass-effect-dark text-white placeholder-white/50 font-semibold focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20 border border-white/20">
+      </div>
+
+      <div class="relative">
+        <label class="block text-white/95 font-bold mb-2 flex items-center gap-2">
+          <i class="fas fa-envelope text-blue-50"></i>
+          Email
+        </label>
+        <input type="email" name="email" required placeholder="Enter email"
+               class="w-full pl-12 pr-5 py-4 rounded-2xl glass-effect-dark text-white placeholder-white/50 font-semibold focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20 border border-white/20">
+      </div>
+
+      <div class="relative">
+        <label class="block text-white/95 font-bold mb-2 flex items-center gap-2">
+          <i class="fas fa-lock text-blue-50"></i>
+          Password
+        </label>
+        <input type="password" name="password" required placeholder="••••••••"
+               class="w-full pl-12 pr-5 py-4 rounded-2xl glass-effect-dark text-white placeholder-white/50 font-semibold focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20 border border-white/20">
+      </div>
+
+      <button type="submit"
+              class="w-full text-white font-black py-5 rounded-3xl shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-500 text-xl flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:to-blue-800">
+        <i class="fas fa-user-plus text-2xl"></i>
+        Create Account
+      </button>
+    </form>
+
+    <div class="mt-6 pt-6 border-t border-white/20 text-center">
+      <p class="text-white/80 text-sm mb-2">Already have an account?</p>
+      <a th:href="@{/login}" class="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-400">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<footer class="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center text-white/50 text-xs md:text-sm">
+  <p>&copy; 2026 Omar's Shop</p>
+</footer>
+</body>
+</html>

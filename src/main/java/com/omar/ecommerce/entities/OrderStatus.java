@@ -5,5 +5,9 @@ public enum OrderStatus {
     PAID,
     SHIPPED,
     DELIVERED,
-    CANCELLED
+    CANCELLED;
+
+    public String cssClass() {
+        return "status-" + name().toLowerCase();
+    }
 }
