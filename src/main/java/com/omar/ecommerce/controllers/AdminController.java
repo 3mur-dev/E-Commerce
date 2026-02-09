@@ -106,6 +106,20 @@ public class AdminController {
         return "redirect:/admin/products";
     }
 
+    private boolean isValidImage(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return false;
+        }
+
+        String contentType = file.getContentType();
+        long maxSize = 5 * 1024 * 1024L; // 5MB
+
+        return contentType != null &&
+                (contentType.equals("image/jpeg") || contentType.equals("image/png")) &&
+                file.getSize() <= maxSize;
+    }
+
+
     @PostMapping("/products/delete/{id}")
     public String deleteProduct(@PathVariable long id, RedirectAttributes ra) {
         try {
