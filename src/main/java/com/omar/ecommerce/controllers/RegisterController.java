@@ -37,7 +37,7 @@ public class RegisterController {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        user.setRole(Role.ADMIN);
+        user.setRole(Role.USER);
 
         userRepository.save(user);
 
