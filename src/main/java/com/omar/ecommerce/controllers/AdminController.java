@@ -80,16 +80,29 @@ public class AdminController {
     @PostMapping("/products/add")
     public String addProduct(@Valid @ModelAttribute ProductRequest request,
                              BindingResult result, RedirectAttributes ra,
-                             @RequestParam(value = "image", required = false) MultipartFile image){
+                             @RequestParam(value = "image", required = false) MultipartFile image) {
 
         if (result.hasErrors()) {
-            ra.addFlashAttribute("errors", result.getAllErrors());
+            ra.addFlashAttribute("errors", result.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .toList());
             return "redirect:/admin/products";
         }
 
-        productService.create(request, image);
-        ra.addFlashAttribute("success", "Product added successfully!");
+        // Validate image BEFORE service call
+        if (image != null && !image.isEmpty()) {
+            if (!isValidImage(image)) {
+                ra.addFlashAttribute("error", "Invalid image: Only JPEG/PNG allowed, max 5MB");
+                return "redirect:/admin/products";
+            }
+        }
 
+        try {
+            productService.create(request, image);  // Service handles null gracefully
+            ra.addFlashAttribute("success", "Product added successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Failed to add product: " + e.getMessage());
+        }
         return "redirect:/admin/products";
     }
 

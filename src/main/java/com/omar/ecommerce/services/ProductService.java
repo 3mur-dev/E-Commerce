@@ -7,6 +7,7 @@ import com.omar.ecommerce.entities.Product;
 import com.omar.ecommerce.repositories.CategoryRepository;
 import com.omar.ecommerce.repositories.FavoriteRepository;
 import com.omar.ecommerce.repositories.ProductRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -83,50 +85,78 @@ public class ProductService {
     public ProductResponse create(ProductRequest request, MultipartFile image) {
         validateProductRequest(request);
 
+        // Validate image FIRST
+        if (image != null && !image.isEmpty()) {
+            if (!isValidImage(image)) {
+                throw new RuntimeException("Invalid image: Only JPEG/PNG allowed, max 5MB");
+            }
+        }
+
         Product product = new Product();
         product.setName(request.getName());
         product.setPrice(request.getPrice());
         product.setStock(request.getStock());
 
-
-        //IMAGE
+        // FIXED: Use absolute runtime path
         if (image != null && !image.isEmpty()) {
             try {
-                String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
-                String uploadDir = "src/main/resources/static/images/products/";
+                String uploadDir = getUploadDirectory();  // Returns /path/to/app/uploads/products/
+                String fileName = UUID.randomUUID() + getFileExtension(image);
 
-                // Create directory if not exists
-                Files.createDirectories(Paths.get(uploadDir));
+                Path filePath = Paths.get(uploadDir, fileName);
+                Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-                // Save file
-                Path filePath = Paths.get(uploadDir + fileName);
-                Files.copy(image.getInputStream(), filePath);
-
-                product.setImageUrl("/images/products/" + fileName);
+                product.setImageUrl("/images/products/" + fileName);  // Static serving path
             } catch (IOException e) {
-                throw new RuntimeException("Image upload failed", e);
+                throw new RuntimeException("Image upload failed: " + e.getMessage(), e);
             }
         } else {
             product.setImageUrl("/images/default.webp");
         }
 
-
         if (productRepository.existsByName(product.getName())) {
             throw new RuntimeException("Product with this name already exists");
         }
 
-
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new NoSuchElementException("Category with ID " + request.getCategoryId() + " not found"));
+                .orElseThrow(() -> new NoSuchElementException("Category not found: " + request.getCategoryId()));
 
         product.setCategory(category);
-
         Product savedProduct = productRepository.save(product);
 
-        // Map entity to response DTO
         return mapToResponse(savedProduct);
     }
 
+    @PostConstruct
+    public void init() {
+        try {
+            Files.createDirectories(Paths.get(getUploadDirectory()));
+            System.out.println(" Upload directory created: " + getUploadDirectory());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create upload directory", e);
+        }
+    }
+
+    // Add these helper methods
+    private String getUploadDirectory() {
+        return Paths.get(System.getProperty("user.dir"), "uploads", "products").toString();
+    }
+
+    private boolean isValidImage(MultipartFile file) {
+        String contentType = file.getContentType();
+        long maxSize = 5 * 1024 * 1024L; // 5MB
+
+        return (contentType != null) &&
+                (contentType.startsWith("image/") &&
+                        (contentType.equals("image/jpeg") || contentType.equals("image/png"))) &&
+                file.getSize() <= maxSize;
+    }
+
+    private String getFileExtension(MultipartFile file) {
+        String originalName = file.getOriginalFilename();
+        return originalName != null && originalName.contains(".") ?
+                originalName.substring(originalName.lastIndexOf(".")) : ".jpg";
+    }
 
     public ProductResponse update(long id, ProductRequest request) {
         validateProductRequest(request);
