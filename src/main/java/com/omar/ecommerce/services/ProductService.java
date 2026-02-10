@@ -8,7 +8,7 @@ import com.omar.ecommerce.repositories.CategoryRepository;
 import com.omar.ecommerce.repositories.FavoriteRepository;
 import com.omar.ecommerce.repositories.ProductRepository;
 import jakarta.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -29,12 +30,15 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final FavoriteRepository  favoriteRepository;
+
+    @Value("${app.upload-dir:uploads}")
+    private String uploadDir;
 
     public List<ProductResponse> findAll(String sort, int page) {
 
@@ -99,11 +103,11 @@ public class ProductService {
                     throw new RuntimeException("Invalid image: Only JPEG/PNG/WebP allowed, max 5MB");
                 }
 
-                Path uploadDir = Paths.get("uploads", "products");
-                Files.createDirectories(uploadDir);
+                Path uploadPath = Paths.get(uploadDir, "products");
+                Files.createDirectories(uploadPath);
 
                 String fileName = UUID.randomUUID() + getFileExtension(image);
-                Path filePath = uploadDir.resolve(fileName).normalize();
+                Path filePath = uploadPath.resolve(fileName).normalize();
                 Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
                 product.setImageUrl("/images/products/" + fileName);
