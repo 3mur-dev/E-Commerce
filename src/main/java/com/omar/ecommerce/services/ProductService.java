@@ -47,6 +47,11 @@ public class ProductService {
 
     private Cloudinary cloudinary;
 
+    @PostConstruct
+    void normalizeCloudinaryConfig() {
+        cloudinaryUrl = normalizeCloudinaryUrl(cloudinaryUrl);
+    }
+
     public List<ProductResponse> findAll(String sort, int page) {
 
         Sort.Direction direction = sort.isEmpty() ? Sort.Direction.ASC :
@@ -166,7 +171,8 @@ public class ProductService {
     }
 
     private boolean isCloudinaryEnabled() {
-        return cloudinaryUrl != null && !cloudinaryUrl.isBlank();
+        cloudinaryUrl = normalizeCloudinaryUrl(cloudinaryUrl);
+        return cloudinaryUrl != null && cloudinaryUrl.startsWith("cloudinary://");
     }
 
     private Cloudinary getCloudinary() {
@@ -175,6 +181,29 @@ public class ProductService {
             cloudinary.config.secure = true;
         }
         return cloudinary;
+    }
+
+    private String normalizeCloudinaryUrl(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String trimmed = raw.trim();
+        if (trimmed.isEmpty()) {
+            return trimmed;
+        }
+        if ((trimmed.startsWith("\"") && trimmed.endsWith("\""))
+                || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+            trimmed = trimmed.substring(1, trimmed.length() - 1).trim();
+        }
+        int schemeIndex = trimmed.indexOf("cloudinary://");
+        if (schemeIndex >= 0) {
+            return trimmed.substring(schemeIndex).trim();
+        }
+        String prefix = "CLOUDINARY_URL=";
+        if (trimmed.startsWith(prefix)) {
+            return trimmed.substring(prefix.length()).trim();
+        }
+        return trimmed;
     }
 
     private String uploadToCloudinary(MultipartFile file) throws IOException {
