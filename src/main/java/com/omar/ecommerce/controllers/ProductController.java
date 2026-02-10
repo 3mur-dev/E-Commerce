@@ -9,9 +9,6 @@ import com.omar.ecommerce.services.ProductService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,13 +43,14 @@ public class ProductController {
                                  @RequestParam(defaultValue = "") String sort,
                                  @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
 
-        List<ProductResponse> products;
+        Page<ProductResponse> productPage;
 
         if (keyword != null && !keyword.isBlank()) {
-            products = productService.searchByName(keyword, sort, page);
+            productPage = productService.searchByName(keyword, sort, page);
         } else {
-            products = productService.findAll(sort, page);
+            productPage = productService.findAll(sort, page);
         }
+        List<ProductResponse> products = productPage.getContent();
 
         if (userDetails != null) {
             String username = userDetails.getUsername();
@@ -85,6 +83,8 @@ public class ProductController {
         }
 
         model.addAttribute("products", products);
+        model.addAttribute("currentPage", productPage.getNumber());
+        model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("cartCount", cartCount);
         model.addAttribute("items", items);
         model.addAttribute("keyword", keyword);

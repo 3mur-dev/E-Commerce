@@ -29,7 +29,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +51,7 @@ public class ProductService {
         cloudinaryUrl = normalizeCloudinaryUrl(cloudinaryUrl);
     }
 
-    public List<ProductResponse> findAll(String sort, int page) {
+    public Page<ProductResponse> findAll(String sort, int page) {
 
         Sort.Direction direction = sort.isEmpty() ? Sort.Direction.ASC :
                 (sort.endsWith(",desc") ? Sort.Direction.DESC : Sort.Direction.ASC);
@@ -61,11 +60,9 @@ public class ProductService {
         Pageable pageable = PageRequest.of(page, 12, Sort.by(direction, sortField));
         Page<Product> productPage = productRepository.findAllActive(pageable);
 
-        return productPage.getContent().stream()
-                .map(this::mapToResponse)  // Your existing mapper method
-                .collect(Collectors.toList());
+        return productPage.map(this::mapToResponse);
     }
-    public List<ProductResponse> searchByName(String keyword, String sort, int page) {
+    public Page<ProductResponse> searchByName(String keyword, String sort, int page) {
         Sort.Direction direction = sort.isEmpty() ? Sort.Direction.ASC :
                 (sort.endsWith(",desc") ? Sort.Direction.DESC : Sort.Direction.ASC);
         String sortField = sort.isEmpty() ? "name" : sort.split(",")[0];
@@ -74,9 +71,7 @@ public class ProductService {
         Page<Product> productPage = productRepository
                 .findByNameContainingIgnoreCase(keyword, pageable);
 
-        return productPage.getContent().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return productPage.map(this::mapToResponse);
     }
 
     public ProductResponse mapToResponse(Product product) {

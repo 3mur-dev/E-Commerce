@@ -266,49 +266,56 @@
 </section>
 
 <!-- 🔥 Functional Pagination -->
-<div class="py-20 bg-white/50 backdrop-blur-sm" th:if="${totalPages > 1}">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center gap-2">
+<div class="py-20" th:if="${totalPages > 1}">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white/70 backdrop-blur-sm border border-white/60 rounded-[2rem] shadow-2xl px-6 py-5 flex flex-wrap items-center justify-center gap-3">
+            <!-- First Page -->
+            <a th:href="@{/products(keyword=${keyword}, page=0, sort=${sort})}"
+               class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-bold rounded-3xl shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-105"
+               aria-label="First page">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
 
-        <!-- First Page -->
-        <a th:href="@{/products(keyword=${keyword}, page=0, sort=${sort})}"
-           class="w-14 h-14 bg-primary-600 text-white font-bold rounded-3xl shadow-2xl hover:shadow-3xl flex items-center justify-center transition-all duration-300 hover:scale-105">
-            <i class="fas fa-angle-double-left"></i>
-        </a>
+            <!-- Previous Page -->
+            <a th:href="@{/products(keyword=${keyword}, page=${currentPage - 1 > 0 ? currentPage - 1 : 0}, sort=${sort})}"
+               th:classappend="${currentPage == 0} ? 'opacity-50 pointer-events-none bg-gray-200 text-gray-400' : 'bg-white/80 text-gray-700 hover:text-primary-600'"
+               class="w-12 h-12 sm:w-14 sm:h-14 rounded-3xl shadow-lg hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-105"
+               aria-label="Previous page">
+                <i class="fas fa-chevron-left"></i>
+            </a>
 
-        <!-- Previous Page -->
-        <a th:href="@{/products(keyword=${keyword}, page=${currentPage - 1 > 0 ? currentPage - 1 : 0}, sort=${sort})}"
-           th:classappend="${currentPage == 0} ? 'opacity-50 cursor-not-allowed bg-gray-200' : 'bg-white/70 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:bg-white text-gray-700 hover:text-primary-600'"
-           class="w-14 h-14 rounded-3xl flex items-center justify-center transition-all duration-300 hover:scale-105">
-            <i class="fas fa-chevron-left"></i>
-        </a>
+            <!-- Page Numbers -->
+            <div th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                 class="flex items-center justify-center">
+                <a th:href="@{/products(keyword=${keyword}, page=${i}, sort=${sort})}"
+                   th:classappend="${i == currentPage} ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white font-bold shadow-2xl scale-105' : 'bg-white/80 text-gray-700 hover:text-primary-600'"
+                   class="w-12 h-12 sm:w-14 sm:h-14 rounded-3xl font-semibold shadow-lg hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-105"
+                   th:text="${i + 1}"
+                   th:attr="aria-current=${i == currentPage ? 'page' : null}">1</a>
+            </div>
 
-        <!-- Page Numbers -->
-        <div th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-             class="flex items-center justify-center">
-            <a th:href="@{/products(keyword=${keyword}, page=${i}, sort=${sort})}"
-               th:classappend="${i == currentPage} ? 'bg-primary-600 text-white font-bold shadow-2xl' : 'bg-white/70 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:bg-white text-gray-700 hover:text-primary-600'"
-               class="w-14 h-14 rounded-3xl font-semibold transition-all duration-300 hover:scale-105"
-               th:text="${i + 1}">1</a>
+            <!-- Next Page -->
+            <a th:href="@{/products(keyword=${keyword}, page=${currentPage + 1 < totalPages ? currentPage + 1 : totalPages - 1}, sort=${sort})}"
+               th:classappend="${currentPage >= totalPages - 1} ? 'opacity-50 pointer-events-none bg-gray-200 text-gray-400' : 'bg-white/80 text-gray-700 hover:text-primary-600'"
+               class="w-12 h-12 sm:w-14 sm:h-14 rounded-3xl shadow-lg hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-105"
+               aria-label="Next page">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+
+            <!-- Last Page -->
+            <a th:href="@{/products(keyword=${keyword}, page=${totalPages - 1}, sort=${sort})}"
+               class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-bold rounded-3xl shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-105"
+               aria-label="Last page">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
         </div>
 
-        <!-- Next Page -->
-        <a th:href="@{/products(keyword=${keyword}, page=${currentPage + 1 < totalPages ? currentPage + 1 : totalPages - 1}, sort=${sort})}"
-           th:classappend="${currentPage >= totalPages - 1} ? 'opacity-50 cursor-not-allowed bg-gray-200' : 'bg-white/70 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:bg-white text-gray-700 hover:text-primary-600'"
-           class="w-14 h-14 rounded-3xl flex items-center justify-center transition-all duration-300 hover:scale-105">
-            <i class="fas fa-chevron-right"></i>
-        </a>
-
-        <!-- Last Page -->
-        <a th:href="@{/products(keyword=${keyword}, page=${totalPages - 1}, sort=${sort})}"
-           class="w-14 h-14 bg-primary-600 text-white font-bold rounded-3xl shadow-2xl hover:shadow-3xl flex items-center justify-center transition-all duration-300 hover:scale-105">
-            <i class="fas fa-angle-double-right"></i>
-        </a>
-    </div>
-
-    <!-- Page Info -->
-    <div class="text-center mt-6 text-sm text-gray-600">
-        Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span>
-        (<span th:text="${#lists.size(products)}"></span> products)
+        <!-- Page Info -->
+        <div class="text-center mt-6 text-sm text-gray-600">
+            Page <span class="font-semibold text-gray-800" th:text="${currentPage + 1}"></span> of
+            <span class="font-semibold text-gray-800" th:text="${totalPages}"></span>
+            (<span th:text="${#lists.size(products)}"></span> products)
+        </div>
     </div>
 </div>
 
