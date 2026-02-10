@@ -28,7 +28,6 @@ import java.util.Optional;
 @AllArgsConstructor
 public class CartController {
 
-    private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final CartService cartService;
     private final ProductRepository productRepository;

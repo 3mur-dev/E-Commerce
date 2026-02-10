@@ -180,6 +180,7 @@
 
                         <td class="px-6 py-6 text-center">
                             <form th:action="@{/admin/orders/updateStatus}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <input type="hidden" name="orderId" th:value="${order.id}" />
                                 <select name="status"
                                         class="status-badge inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold mx-auto cursor-pointer"

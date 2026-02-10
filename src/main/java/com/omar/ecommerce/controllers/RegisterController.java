@@ -3,11 +3,13 @@ package com.omar.ecommerce.controllers;
 import com.omar.ecommerce.entities.Role;
 import com.omar.ecommerce.entities.User;
 import com.omar.ecommerce.repositories.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,11 +30,17 @@ public class RegisterController {
 
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute("user") User user) {
+    public String registerUser(@Valid @ModelAttribute("user") User user, BindingResult result) {
+        if (result.hasErrors()) {
+            return "redirect:/register?error=Invalid+registration+details";
+        }
 
-        // Check if username already exists
-        if (userRepository.existsByUsername(user.getUsername())) {
+        // Check if username or email already exists (including soft-deleted)
+        if (userRepository.existsByUsernameAny(user.getUsername())) {
             return "redirect:/register?error=Username+already+exists";
+        }
+        if (userRepository.existsByEmailAny(user.getEmail())) {
+            return "redirect:/register?error=Email+already+exists";
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));

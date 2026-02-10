@@ -70,7 +70,19 @@
           <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
         </a>
       </nav>
+      <button id="mobileMenuButton" class="md:hidden p-2 rounded-xl bg-white/20 backdrop-blur-sm" aria-controls="mobileMenu" aria-expanded="false">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
     </div>
+    <nav id="mobileMenu" class="md:hidden hidden pb-4">
+      <div class="flex flex-col gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+        <a href="/" class="text-white/90"><i class="fas fa-home mr-2"></i>Home</a>
+        <a href="/products" class="text-white/90"><i class="fas fa-store mr-2"></i>Products</a>
+        <a href="/cart" class="text-white font-semibold"><i class="fas fa-shopping-cart mr-2"></i>Cart</a>
+        <a href="/about" class="text-white/90"><i class="fas fa-info-circle mr-2"></i>About</a>
+        <a href="/contact" class="text-white/90"><i class="fas fa-envelope mr-2"></i>Contact</a>
+      </div>
+    </nav>
   </div>
 </header>
 
@@ -140,6 +152,7 @@
               <!-- Quantity Controls -->
               <div class="flex items-center space-x-3">
                 <form th:action="@{/cart/decrease}" method="post" class="inline-flex">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                   <input type="hidden" name="productId" th:value="${item.product.id}" />
                   <button type="submit"
                           class="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center text-xl font-bold transition-all duration-200 hover:scale-110 shadow-md"
@@ -154,6 +167,7 @@
                   </span>
 
                 <form th:action="@{/cart/add}" method="post" class="inline-flex">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                   <input type="hidden" name="productId" th:value="${item.product.id}" />
                   <button type="submit"
                           class="w-12 h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-xl flex items-center justify-center text-xl font-bold transition-all duration-200 hover:scale-110 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
@@ -229,6 +243,7 @@
           </div>
 
           <form th:action="@{/cart/checkout}" method="post" class="w-full">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <button type="submit"
                     class="w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold py-4 px-6 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 text-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     th:disabled="${hasOutOfStock}">
@@ -263,6 +278,7 @@
 
 <!-- JavaScript -->
 <script>
+
   // Enhanced quantity confirmation
   document.addEventListener('DOMContentLoaded', function() {
     const decreaseForms = document.querySelectorAll('form[action="/cart/decrease"]');
@@ -289,8 +305,18 @@
       });
     });
 
-    document.querySelectorAll('.group').forEach(el => observer.observe(el));
+  document.querySelectorAll('.group').forEach(el => observer.observe(el));
   });
+
+  const mobileMenuButton = document.getElementById('mobileMenuButton');
+  const mobileMenu = document.getElementById('mobileMenu');
+  if (mobileMenuButton && mobileMenu) {
+    mobileMenuButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+      const expanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+      mobileMenuButton.setAttribute('aria-expanded', String(!expanded));
+    });
+  }
 </script>
 
 <style>

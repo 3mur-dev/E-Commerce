@@ -126,6 +126,7 @@
     </h2>
 
     <form th:action="@{/admin/products/add}" method="post" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
       <!-- Product Name -->
       <div class="space-y-2">
@@ -218,6 +219,20 @@
                         <span th:text="${#lists.size(products)}">12</span> Products
                     </span>
       </h2>
+      <form th:action="@{/admin/products}" method="get" class="w-full sm:w-auto">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <div class="relative w-full sm:w-80">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" name="keyword" th:value="${keyword}"
+                   class="w-full pl-12 pr-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20 bg-white/70 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 text-base"
+                   placeholder="Search products by name">
+          </div>
+          <button type="submit"
+                  class="px-5 py-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+            Search
+          </button>
+        </div>
+      </form>
     </div>
 
     <!-- Products Grid -->
@@ -229,6 +244,7 @@
           <th class="px-6 py-5 font-bold text-gray-700 uppercase text-xs tracking-wider">Product</th>
           <th class="px-6 py-5 font-bold text-gray-700 uppercase text-xs tracking-wider text-center">Price</th>
           <th class="px-6 py-5 font-bold text-gray-700 uppercase text-xs tracking-wider text-center">Stock</th>
+          <th class="px-6 py-5 font-bold text-gray-700 uppercase text-xs tracking-wider text-center">Status</th>
           <th class="px-6 py-5 font-bold text-gray-700 uppercase text-xs tracking-wider text-center rounded-tr-2xl">Actions</th>
         </tr>
         </thead>
@@ -261,6 +277,12 @@
                   class="inline-flex items-center px-4 py-2 bg-red-100 text-red-800 font-bold rounded-2xl text-lg">0</span>
           </td>
           <td class="px-6 py-6 text-center">
+            <span th:if="${product.deleted}"
+                  class="inline-flex items-center px-4 py-2 bg-amber-100 text-amber-800 font-bold rounded-2xl text-sm uppercase tracking-wide">Deleted</span>
+            <span th:unless="${product.deleted}"
+                  class="inline-flex items-center px-4 py-2 bg-emerald-100 text-emerald-800 font-bold rounded-2xl text-sm uppercase tracking-wide">Active</span>
+          </td>
+          <td class="px-6 py-6 text-center">
             <div class="flex items-center justify-center gap-2">
               <a th:href="@{'/admin/products/edit/' + ${product.id}}"
                  class="group relative p-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 hover:-translate-y-1">
@@ -269,6 +291,7 @@
               </a>
               <form th:action="@{'/admin/products/delete/' + ${product.id}}" method="post" class="inline"
                     onsubmit="return confirm('Delete this product?')">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button type="submit"
                         class="group p-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 hover:-translate-y-1 ml-2">
                   <i class="fas fa-trash text-lg group-hover:scale-110 transition-transform"></i>

@@ -8,8 +8,10 @@ import com.omar.ecommerce.repositories.ProductRepository;
 import com.omar.ecommerce.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,13 +28,17 @@ public class FavoriteService {
         return favoriteRepository.findProductIdsByUsername(username);
     }
 
+    @Transactional
     public boolean toggleFavorite(Long userId, Long productId) {
 
         Optional<Favorite> existing = favoriteRepository
                 .findByUserIdAndProductId(userId, productId);
 
         if (existing.isPresent()) {
-            favoriteRepository.delete(existing.get());
+            try {
+                favoriteRepository.delete(existing.get());
+            } catch (Exception ignored) {
+            }
             return false; // unfavorited
         }
 
@@ -46,7 +52,12 @@ public class FavoriteService {
         favorite.setUser(user);
         favorite.setProduct(product);
 
-        favoriteRepository.save(favorite);
-        return true; // favorited
+        try {
+            favoriteRepository.save(favorite);
+            return true; // favorited
+        } catch (Exception e) {
+            //If duplicate insert happens, treat as already favorited
+            return true;
+        }
     }
 }

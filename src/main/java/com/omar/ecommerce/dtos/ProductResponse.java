@@ -15,6 +15,7 @@ public class ProductResponse {
     private BigDecimal price;
     private Long categoryId;
     private int stock;
+    private boolean deleted;
     private boolean favorited = false;
     private String imageUrl;
 }

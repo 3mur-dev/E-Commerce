@@ -2,3 +2,5 @@
 application-dev.properties
 .env
 .env.local
+target/
+uploads/

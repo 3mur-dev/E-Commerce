@@ -90,10 +90,19 @@
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
                 </a>
             </nav>
-            <button class="md:hidden p-2 rounded-xl bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all duration-200">
+            <button id="mobileMenuButton" class="md:hidden p-2 rounded-xl bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all duration-200" aria-controls="mobileMenu" aria-expanded="false">
                 <i class="fas fa-bars text-xl"></i>
             </button>
         </div>
+        <nav id="mobileMenu" class="md:hidden hidden pb-4">
+            <div class="flex flex-col gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+                <a href="/" class="text-white/90"><i class="fas fa-home mr-2"></i>Home</a>
+                <a href="/products" class="text-white font-semibold"><i class="fas fa-store mr-2"></i>Products</a>
+                <a href="/cart" class="text-white/90"><i class="fas fa-shopping-cart mr-2"></i>Cart</a>
+                <a href="/about" class="text-white/90"><i class="fas fa-info-circle mr-2"></i>About Us</a>
+                <a href="/contact" class="text-white/90"><i class="fas fa-envelope mr-2"></i>Contact</a>
+            </div>
+        </nav>
     </div>
 </header>
 
@@ -218,6 +227,7 @@
 
                     <!-- Add to Cart Button -->
                     <form th:action="@{/cart/add}" method="post" class="w-full">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" name="productId" th:value="${product.id}" />
                         <button type="submit"
                                 th:disabled="${product.stock <= 0}"
@@ -315,10 +325,17 @@
 </footer>
 
 <script>
-    async function toggleFavorite(btn) {
-      try {
-        const productId = btn.getAttribute('data-product-id');
+    const loadingFavorites = new Set(); // prevent spam per product
 
+    async function toggleFavorite(btn) {
+      const productId = btn.getAttribute('data-product-id');
+
+      // 🚫 prevent spam clicking
+      if (loadingFavorites.has(productId)) return;
+      loadingFavorites.add(productId);
+      btn.disabled = true;
+
+      try {
         // read CSRF info
         const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
         const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
@@ -336,8 +353,16 @@
           body: body.toString()
         });
 
-        if (response.status === 401) {
+        if (response.redirected) {
+          window.location.href = response.url;
+          return;
+        }
+        if (response.status === 401 || response.status === 403) {
           window.location.href = '/login';
+          return;
+        }
+        if (!response.ok) {
+          alert('Could not toggle favorite. Please try again.');
           return;
         }
 
@@ -349,18 +374,34 @@
           heartIcon.classList.remove('text-gray-600');
           heartIcon.classList.add('text-red-500');
           btn.setAttribute('aria-pressed', 'true');
-        } else if (text === 'unfavorited') {
+        }
+        else if (text === 'unfavorited') {
           heartIcon.classList.remove('text-red-500');
           heartIcon.classList.add('text-gray-600');
           btn.setAttribute('aria-pressed', 'false');
-        } else {
+        }
+        else {
           alert(text);
         }
 
       } catch (err) {
         console.error('favorite toggle failed', err);
         alert('Could not toggle favorite. See console for details.');
+      } finally {
+        // re-enable button
+        loadingFavorites.delete(productId);
+        btn.disabled = false;
       }
+    }
+
+    const mobileMenuButton = document.getElementById('mobileMenuButton');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenuButton && mobileMenu) {
+      mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        const expanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+        mobileMenuButton.setAttribute('aria-expanded', String(!expanded));
+      });
     }
 </script>
 

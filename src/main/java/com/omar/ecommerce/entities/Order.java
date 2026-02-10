@@ -2,6 +2,7 @@ package com.omar.ecommerce.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,11 +20,12 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
 
-    @Column(nullable = false, updatable = false)
+    @CreationTimestamp
+    @Column(name = "creationTimestamp", nullable = false, updatable = false) // must match Postgres exactly
     private LocalDateTime creationTimestamp;
 
     @Column(nullable = false, precision = 15, scale = 2)
-    private BigDecimal total;
+    private BigDecimal total = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -31,12 +33,4 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
-
-    @PrePersist
-    public void prePersist() {
-        this.creationTimestamp = LocalDateTime.now();
-        if (this.total == null) {
-            this.total = BigDecimal.ZERO;
-        }
-    }
 }

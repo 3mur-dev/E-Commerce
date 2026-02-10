@@ -21,6 +21,9 @@ private final UserRepository userRepository;
 
     @GetMapping("/order-summary")
     public String orderSummary(Model model, Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/login";
+        }
 
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         String username = userDetails.getUsername();

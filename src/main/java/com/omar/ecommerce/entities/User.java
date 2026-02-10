@@ -3,13 +3,16 @@ package com.omar.ecommerce.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
 
 @Entity
 @Data
 @Table(name = "app_users")
+@SQLDelete(sql = "UPDATE app_users SET deleted = true WHERE id = ?") // intercept delete
 public class User {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -30,4 +33,6 @@ public class User {
     @Column(name = "role", nullable = false)
     private Role role;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 }

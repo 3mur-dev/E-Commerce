@@ -53,7 +53,7 @@ public class OrderService {
 
         // Process each cart item
         for (CartItem ci : items) {
-            Product product = productRepository.findById(ci.getProduct().getId())
+            Product product = productRepository.findByIdForUpdate(ci.getProduct().getId())
                     .orElseThrow(() -> new IllegalStateException("Product not found: " + ci.getProduct().getId()));
 
             // Check stock

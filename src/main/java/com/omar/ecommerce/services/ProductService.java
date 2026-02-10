@@ -43,7 +43,7 @@ public class ProductService {
         String sortField = sort.isEmpty() ? "name" : sort.split(",")[0];
 
         Pageable pageable = PageRequest.of(page, 12, Sort.by(direction, sortField));
-        Page<Product> productPage = productRepository.findAll(pageable);
+        Page<Product> productPage = productRepository.findAllActive(pageable);
 
         return productPage.getContent().stream()
                 .map(this::mapToResponse)  // Your existing mapper method
@@ -71,6 +71,7 @@ public class ProductService {
         resp.setCategoryId(product.getCategory().getId());
         resp.setStock(product.getStock());
         resp.setImageUrl(product.getImageUrl());
+        resp.setDeleted(Boolean.TRUE.equals(product.getDeleted()));
         return resp;
     }
 
@@ -94,12 +95,16 @@ public class ProductService {
         // FIXED: Use absolute runtime path
         if (image != null && !image.isEmpty()) {
             try {
-                String uploadDir = "uploads/products/";  // Simple like before
-                Files.createDirectories(Paths.get(uploadDir));  // Creates if needed
+                if (!isValidImage(image)) {
+                    throw new RuntimeException("Invalid image: Only JPEG/PNG/WebP allowed, max 5MB");
+                }
 
-                String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
-                Path filePath = Paths.get(uploadDir + fileName);
-                Files.copy(image.getInputStream(), filePath);
+                Path uploadDir = Paths.get("uploads", "products");
+                Files.createDirectories(uploadDir);
+
+                String fileName = UUID.randomUUID() + getFileExtension(image);
+                Path filePath = uploadDir.resolve(fileName).normalize();
+                Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
                 product.setImageUrl("/images/products/" + fileName);
             } catch (IOException e) {
@@ -131,14 +136,17 @@ public class ProductService {
 
         return (contentType != null) &&
                 (contentType.startsWith("image/") &&
-                        (contentType.equals("image/jpeg") || contentType.equals("image/png"))) &&
+                        (contentType.equals("image/jpeg") || contentType.equals("image/png") || contentType.equals("image/webp"))) &&
                 file.getSize() <= maxSize;
     }
 
     private String getFileExtension(MultipartFile file) {
         String originalName = file.getOriginalFilename();
-        return originalName != null && originalName.contains(".") ?
-                originalName.substring(originalName.lastIndexOf(".")) : ".jpg";
+        if (originalName == null) {
+            return ".jpg";
+        }
+        String sanitized = Paths.get(originalName).getFileName().toString();
+        return sanitized.contains(".") ? sanitized.substring(sanitized.lastIndexOf(".")) : ".jpg";
     }
 
     public ProductResponse update(long id, ProductRequest request) {
@@ -176,7 +184,8 @@ public class ProductService {
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Product with ID " + id + " not found"));
-        productRepository.delete(product);
+        product.setDeleted(true);
+        productRepository.save(product);
     }
 
     public ProductResponse getResponseById(long id) {

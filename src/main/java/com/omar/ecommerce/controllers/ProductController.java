@@ -77,12 +77,6 @@ public class ProductController {
             Cart cart = cartRepository.findByUser(user).orElseGet(() -> {
                 Cart newCart = new Cart();
                 newCart.setUser(user);
-
-
-                User cartUser = new User();
-                cartUser.setId(user.getId());
-                newCart.setUser(cartUser);
-
                 return cartRepository.save(newCart);
             });
 
