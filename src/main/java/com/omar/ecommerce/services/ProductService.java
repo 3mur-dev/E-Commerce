@@ -1,5 +1,7 @@
 package com.omar.ecommerce.services;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.omar.ecommerce.dtos.ProductRequest;
 import com.omar.ecommerce.dtos.ProductResponse;
 import com.omar.ecommerce.entities.Category;
@@ -39,6 +41,11 @@ public class ProductService {
 
     @Value("${app.upload-dir:uploads}")
     private String uploadDir;
+
+    @Value("${CLOUDINARY_URL:}")
+    private String cloudinaryUrl;
+
+    private Cloudinary cloudinary;
 
     public List<ProductResponse> findAll(String sort, int page) {
 
@@ -103,14 +110,19 @@ public class ProductService {
                     throw new RuntimeException("Invalid image: Only JPEG/PNG/WebP allowed, max 5MB");
                 }
 
-                Path uploadPath = Paths.get(uploadDir, "products");
-                Files.createDirectories(uploadPath);
+                if (isCloudinaryEnabled()) {
+                    String imageUrl = uploadToCloudinary(image);
+                    product.setImageUrl(imageUrl);
+                } else {
+                    Path uploadPath = Paths.get(uploadDir, "products");
+                    Files.createDirectories(uploadPath);
 
-                String fileName = UUID.randomUUID() + getFileExtension(image);
-                Path filePath = uploadPath.resolve(fileName).normalize();
-                Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                    String fileName = UUID.randomUUID() + getFileExtension(image);
+                    Path filePath = uploadPath.resolve(fileName).normalize();
+                    Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-                product.setImageUrl("/images/products/" + fileName);
+                    product.setImageUrl("/images/products/" + fileName);
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Image upload failed", e);
             }
@@ -151,6 +163,28 @@ public class ProductService {
         }
         String sanitized = Paths.get(originalName).getFileName().toString();
         return sanitized.contains(".") ? sanitized.substring(sanitized.lastIndexOf(".")) : ".jpg";
+    }
+
+    private boolean isCloudinaryEnabled() {
+        return cloudinaryUrl != null && !cloudinaryUrl.isBlank();
+    }
+
+    private Cloudinary getCloudinary() {
+        if (cloudinary == null) {
+            cloudinary = new Cloudinary(cloudinaryUrl);
+            cloudinary.config.secure = true;
+        }
+        return cloudinary;
+    }
+
+    private String uploadToCloudinary(MultipartFile file) throws IOException {
+        Cloudinary client = getCloudinary();
+        var uploadResult = client.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder", "products"));
+        Object secureUrl = uploadResult.get("secure_url");
+        if (secureUrl == null) {
+            throw new RuntimeException("Cloudinary upload failed: missing secure_url");
+        }
+        return secureUrl.toString();
     }
 
     public ProductResponse update(long id, ProductRequest request) {
