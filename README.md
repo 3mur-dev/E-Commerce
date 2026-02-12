@@ -32,6 +32,8 @@ Shopping cart (add, update, remove items)
 
 Order placement and order history
 
+add products to whishlists
+
 🛠️ Admin Features
 
 Product CRUD (create, update, delete)
@@ -74,6 +76,12 @@ Product, Category
 Cart, CartItem
 
 Order, OrderItem
+
+whishlist, whishlistItem
+
+Render Link:
+
+https://e-commerce-shoppio.onrender.com
 
 🐳 Docker Setup (Recommended)
 
@@ -179,8 +187,6 @@ Docker for environment consistency and easier deployment.
 
 📈 Future Improvements
 
-REST API + React/Vue frontend
-
 JWT-based authentication
 
 Payment gateway integration (Stripe/PayPal)
@@ -205,4 +211,4 @@ Service layer responsibilities and code structure
 
 GitHub: https://github.com/3mur-dev
 
-Email: omar.dev@example.com
+Email: 3mur@gmail.com
