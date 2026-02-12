@@ -3,9 +3,11 @@ package com.omar.ecommerce.controllers;
 import com.omar.ecommerce.entities.User;
 import com.omar.ecommerce.repositories.UserRepository;
 import com.omar.ecommerce.services.FavoriteService;
+import com.omar.ecommerce.services.WishlistService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
@@ -16,17 +18,18 @@ import java.util.Optional;
 
     private final UserRepository userRepository;
     private final FavoriteService favoriteService;
+    private final WishlistService wishlistService;
 
     @PostMapping("/toggle")
     public ResponseEntity<String> toggleFavorite(
             @RequestParam Long productId,
-            Authentication auth) {
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        if (auth == null || !auth.isAuthenticated()) {
+        if (userDetails == null) {
             return ResponseEntity.status(401).body("Not logged in");
         }
 
-        String username = auth.getName();
+        String username = userDetails.getUsername();
         Optional<User> userOpt = userRepository.findByUsername(username);
 
         if (userOpt.isEmpty()) {
@@ -35,6 +38,14 @@ import java.util.Optional;
 
         User user = userOpt.get();
         boolean isNowFavorite = favoriteService.toggleFavorite(user.getId(), productId);
+        try {
+            if (isNowFavorite) {
+                wishlistService.addToDefaultList(user, productId);
+            } else {
+                wishlistService.removeFromDefaultList(user, productId);
+            }
+        } catch (Exception ignored) {
+        }
 
         return ResponseEntity.ok(isNowFavorite ? "favorited" : "unfavorited");
     }

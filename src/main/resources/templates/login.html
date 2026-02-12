@@ -139,7 +139,7 @@
                         <input type="checkbox" name="remember-me" class="w-4 h-4 rounded bg-white/20 border-white/30 focus:ring-primary-500">
                         <span class="group-hover:text-white">Remember me</span>
                     </label>
-                    <a href="#" class="text-primary-200 hover:text-white font-medium hover:underline">Forgot Password?</a>
+                    <a href="/forgot-password" class="text-primary-200 hover:text-white font-medium hover:underline">Forgot Password?</a>
                 </div>
 
                 <button type="submit"
@@ -157,6 +157,32 @@
                     <h3 class="font-bold text-lg">Login Failed</h3>
                 </div>
                 <p class="text-sm">Invalid credentials. Please try again.</p>
+            </div>
+
+            <div th:if="${param.verify == 'sent'}" class="mt-8 p-6 rounded-3xl bg-emerald-500/10 border-2 border-emerald-400/40 backdrop-blur-sm text-emerald-100">
+                <div class="flex items-center gap-3 mb-2">
+                    <i class="fas fa-envelope text-xl text-emerald-400"></i>
+                    <h3 class="font-bold text-lg">Verify Your Email</h3>
+                </div>
+                <p class="text-sm">Check your inbox for a verification link.</p>
+            </div>
+
+            <div th:if="${param.verify == 'required'}" class="mt-8 p-6 rounded-3xl bg-amber-500/10 border-2 border-amber-400/40 backdrop-blur-sm text-amber-100">
+                <div class="flex items-center gap-3 mb-2">
+                    <i class="fas fa-lock text-xl text-amber-300"></i>
+                    <h3 class="font-bold text-lg">Email Not Verified</h3>
+                </div>
+                <p class="text-sm">Please verify your email before signing in.</p>
+                <a href="/resend-verification" class="underline text-sm text-amber-100">Resend verification email</a>
+            </div>
+
+            <div th:if="${param.verify == 'failed'}" class="mt-8 p-6 rounded-3xl bg-red-500/10 border-2 border-red-400/40 backdrop-blur-sm text-red-100">
+                <div class="flex items-center gap-3 mb-2">
+                    <i class="fas fa-triangle-exclamation text-xl text-red-400"></i>
+                    <h3 class="font-bold text-lg">Verification Email Failed</h3>
+                </div>
+                <p class="text-sm">We could not send the verification email. Try resending.</p>
+                <a href="/resend-verification" class="underline text-sm text-red-100">Resend verification email</a>
             </div>
 
             <div th:if="${param.logout}" class="mt-8 p-6 rounded-3xl bg-emerald-500/10 border-2 border-emerald-400/40 backdrop-blur-sm text-emerald-100">

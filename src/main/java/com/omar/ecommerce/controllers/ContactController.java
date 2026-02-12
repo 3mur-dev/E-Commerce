@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ContactController {
     private final MessageService messageService;
 
-    @GetMapping("/contact")
+    @GetMapping({"/contact", "/contact.html"})
     public String contactPage(Model model) {
         model.addAttribute("messageRequest", new MessageRequest());
         return "contact";

@@ -9,6 +9,7 @@ import com.omar.ecommerce.entities.Product;
 import com.omar.ecommerce.repositories.CategoryRepository;
 import com.omar.ecommerce.repositories.FavoriteRepository;
 import com.omar.ecommerce.repositories.ProductRepository;
+import com.omar.ecommerce.repositories.WishlistItemRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,7 +37,8 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
-    private final FavoriteRepository  favoriteRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final WishlistItemRepository wishlistItemRepository;
 
     @Value("${app.upload-dir:uploads}")
     private String uploadDir;
@@ -243,6 +245,7 @@ public class ProductService {
 
         // DELETE FAVORITES FIRST
         favoriteRepository.deleteByProductId(id);
+        wishlistItemRepository.deleteByProductId(id);
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Product with ID " + id + " not found"));

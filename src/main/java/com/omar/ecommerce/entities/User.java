@@ -35,4 +35,7 @@ public class User {
 
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
+
+    @Column(name = "email_verified")
+    private Boolean emailVerified;
 }

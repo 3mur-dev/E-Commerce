@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Wishlist - Shoppio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                primary: {
+                  50: '#eff6ff',
+                  500: '#3b82f6',
+                  600: '#2563eb',
+                  700: '#1d4ed8',
+                  900: '#1e3a8a'
+                }
+              }
+            }
+          }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-card {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+          backdrop-filter: blur(10px);
+          background: rgba(255, 255, 255, 0.25);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
+
+<header class="gradient-card text-white shadow-2xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+            <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                Shoppio
+            </h1>
+            <a href="/products" class="text-white/90 hover:text-white font-semibold">
+                <i class="fas fa-store mr-2"></i>Shop
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <div th:if="${notFound}" class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-12 text-center">
+        <div class="w-20 h-20 bg-gray-100 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+            <i class="fas fa-heart-broken text-3xl text-gray-400"></i>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">Wishlist Not Found</h2>
+        <p class="text-gray-600">This share link is invalid or the list is private.</p>
+    </div>
+
+    <div th:if="${!notFound}">
+        <div class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-6 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800" th:text="${wishlist.name}">Wishlist</h2>
+            <p class="text-sm text-gray-500 mt-1">Shared wishlist</p>
+        </div>
+
+        <div th:if="${items == null or #lists.isEmpty(items)}"
+             class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-12 text-center">
+            <div class="w-20 h-20 bg-gray-100 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+                <i class="fas fa-heart text-3xl text-gray-400"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">No items yet</h3>
+            <p class="text-gray-600">This list is currently empty.</p>
+        </div>
+
+        <div th:if="${items != null and !#lists.isEmpty(items)}" class="grid gap-6 md:grid-cols-2">
+            <div th:each="item : ${items}"
+                 class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 overflow-hidden">
+                <div class="p-6 flex items-start gap-4">
+                    <img th:src="${item.product.imageUrl ?: '/images/default.webp'}"
+                         th:alt="${item.product.name}"
+                         class="w-20 h-20 rounded-2xl object-cover bg-gray-100" />
+                    <div class="flex-1">
+                        <h4 class="text-xl font-bold text-gray-800" th:text="${item.product.name}">Product</h4>
+                        <p class="text-sm text-gray-500"
+                           th:text="${#numbers.formatDecimal(item.product.price, 1, 'COMMA', 2, 'POINT')}">
+                            $0.00
+                        </p>
+                        <p class="text-xs text-gray-500" th:text="'Desired: ' + ${item.desiredQuantity}">Desired: 1</p>
+                        <p class="text-xs text-gray-500" th:if="${item.priority != null}" th:text="'Priority: ' + ${item.priority}">
+                            Priority: 3
+                        </p>
+                        <p class="text-xs text-gray-500" th:if="${item.note != null and !item.note.isBlank()}" th:text="'Note: ' + ${item.note}">
+                            Note
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="gradient-card text-white mt-24 pt-12 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <p class="text-lg opacity-90">&copy; 2026 Omar's Shop. All rights reserved.</p>
+        <div class="mt-4 space-x-6">
+            <a href="/privacy" class="hover:text-blue-100 transition-colors duration-200">Privacy</a>
+            <a href="/terms" class="hover:text-blue-100 transition-colors duration-200">Terms</a>
+            <a href="/support" class="hover:text-blue-100 transition-colors duration-200">Support</a>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

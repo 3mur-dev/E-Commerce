@@ -9,13 +9,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.SavedRequest;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
 
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 @EnableWebSecurity
@@ -25,10 +31,21 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final CustomUserDetailsService customUserDetailsService;
 
+    @Value("${app.remember-me.key:change-this-key}")
+    private String rememberMeKey;
+
     // CUSTOM SUCCESS HANDLER - User vs Admin Detection
     @Bean
     public AuthenticationSuccessHandler successHandler() {
         return (request, response, authentication) -> {
+            RequestCache requestCache = new HttpSessionRequestCache();
+            SavedRequest savedRequest = requestCache.getRequest(request, response);
+            if (savedRequest != null) {
+                requestCache.removeRequest(request, response);
+                response.sendRedirect(savedRequest.getRedirectUrl());
+                return;
+            }
+
             String username = authentication.getName();
             Optional<User> userOpt = userRepository.findByUsername(username);
 
@@ -58,7 +75,39 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/products**").permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/login",
+                                "/register",
+                                "/verify-email",
+                                "/resend-verification",
+                                "/forgot-password",
+                                "/reset-password",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/products**",
+                                "/contact",
+                                "/contact.html",
+                                "/contact/**",
+                                "/about",
+                                "/about.html",
+                                "/aboutUs",
+                                "/aboutUs.html",
+                                "/privacy",
+                                "/privacy/",
+                                "/privacy.html",
+                                "/terms",
+                                "/terms/",
+                                "/terms.html",
+                                "/privacy/**",
+                                "/terms/**",
+                                "/support",
+                                "/support/",
+                                "/support.html",
+                                "/support/**",
+                                "/wishlists/shared/**"
+                        ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/cart/**", "/orders/**", "/order-summary").authenticated()
                         .anyRequest().authenticated()
@@ -66,7 +115,20 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .successHandler(successHandler())
+                        .failureHandler((request, response, exception) -> {
+                            if (exception instanceof DisabledException) {
+                                response.sendRedirect("/login?verify=required");
+                                return;
+                            }
+                            response.sendRedirect("/login?error");
+                        })
                         .permitAll()
+                )
+                .rememberMe(remember -> remember
+                        .rememberMeParameter("remember-me")
+                        .key(rememberMeKey)
+                        .userDetailsService(customUserDetailsService)
+                        .tokenValiditySeconds(60 * 60 * 24 * 14)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
