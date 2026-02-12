@@ -212,3 +212,11 @@ Service layer responsibilities and code structure
 GitHub: https://github.com/3mur-dev
 
 Email: 3mur@gmail.com
+
+Project's Images:
+
+Home Page:
+<img width="1919" height="942" alt="Screenshot 2026-02-12 161942" src="https://github.com/user-attachments/assets/c449409a-ac01-419e-9e1e-2c71bee82a03" />
+
+
+
