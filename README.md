@@ -218,8 +218,13 @@ Project's Images:
 Home Page:
 <img width="1919" height="942" alt="Screenshot 2026-02-12 161942" src="https://github.com/user-attachments/assets/c449409a-ac01-419e-9e1e-2c71bee82a03" />
 
-Product Page:
+Products Page:
 <img width="1918" height="944" alt="Screenshot 2026-02-12 162010" src="https://github.com/user-attachments/assets/8c0c35ed-d883-4b9e-a65c-a7a85072364b" />
+
+<img width="1917" height="941" alt="Screenshot 2026-02-12 162028" src="https://github.com/user-attachments/assets/a5923677-336f-4cac-acf1-cdb7ea4be994" />
+
+Login Page:
+<img width="1919" height="944" alt="Screenshot 2026-02-12 162633" src="https://github.com/user-attachments/assets/c876d44f-3206-45f2-8f47-a88c812cd749" />
 
 
 
