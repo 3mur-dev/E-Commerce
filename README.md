@@ -167,6 +167,27 @@ server.port=8080
 4️⃣ Run the application
 mvn spring-boot:run
 
+🧪 Testing
+
+This project now includes both unit and integration tests:
+
+Unit tests (`*Test`) run with Maven Surefire (Mockito + JUnit 5).
+
+Integration tests (`*IT`) run with Maven Failsafe (`@DataJpaTest` with H2 in-memory DB).
+
+Run only unit tests:
+mvn test
+
+Run unit + integration tests:
+mvn verify
+
+🤖 CI Integration (GitHub Actions)
+
+A CI workflow is available at `.github/workflows/ci.yml`.
+
+It runs on push and pull requests to `main` and `master`, then executes:
+./mvnw -B clean verify
+
 🔐 Security
 
 Passwords are encrypted using BCrypt
@@ -191,7 +212,7 @@ JWT-based authentication
 
 Payment gateway integration (Stripe/PayPal)
 
-Unit & integration tests
+Increase automated test coverage across services and controllers
 
 👀 For Reviewers
 
