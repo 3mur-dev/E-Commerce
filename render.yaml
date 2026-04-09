@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: ecommerce
+    env: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: RESET_BASE_URL
+        sync: false
+      - key: VERIFY_BASE_URL
+        sync: false

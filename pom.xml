@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.0</version>
+        <version>3.3.2</version>
         <relativePath/>
     </parent>
 
@@ -18,6 +18,12 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>spring-api-starter</name>
     <description>Spring Boot API starter</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <lombok.version>1.18.38</lombok.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
+    </properties>
 
     <!-- ===================== -->
     <!-- Dependencies -->
@@ -66,7 +72,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.32</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -74,14 +80,15 @@
         <dependency>
             <artifactId>mapstruct</artifactId>
             <groupId>org.mapstruct</groupId>
-            <version>1.6.3</version>
+            <version>${mapstruct.version}</version>
         </dependency>
 
         <!-- MapStruct-processor API -->
         <dependency>
             <artifactId>mapstruct-processor</artifactId>
             <groupId>org.mapstruct</groupId>
-            <version>1.6.3</version>
+            <version>${mapstruct.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- validation -->
@@ -121,12 +128,6 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!-- Thymeleaf Security Extra 6-->
-        <dependency>
-            <groupId>org.thymeleaf.extras</groupId>
-            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
-            <version>3.1.1.RELEASE</version>
-        </dependency>
     </dependencies>
     <!-- ===================== -->
     <!-- Build -->
@@ -137,6 +138,27 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>${java.version}</release>
+                    <proc>full</proc>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
             </plugin>
 
             <!-- Unit tests -->
