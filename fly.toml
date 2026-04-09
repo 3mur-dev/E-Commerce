@@ -1,0 +1,32 @@
+app = "ecommerce-3mur"
+primary_region = "fra"
+
+[build]
+  builder = "docker"
+
+[env]
+  PORT = "8080"
+  DB_URL = "postgres://ecommerce:ecommerce123@ecommerce-db:5432/ecommerce_db"
+  DB_USERNAME = "ecommerce"
+  DB_PASSWORD = "ecommerce123"
+  MAIL_USERNAME = ""
+  MAIL_PASSWORD = ""
+  MAIL_FROM = "noreply@ecommerce.com"
+  UPLOAD_DIR = "/app/uploads"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+  processes = ["app"]
+  
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 100
+    soft_limit = 80
