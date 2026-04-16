@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,7 +56,6 @@
         .stock-low { background: #ef4444; } /* red */
         .stock-out { background: #6b7280; } /* gray */
     </style>
-    <link href="/css/polish.css" rel="stylesheet">
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
 
@@ -94,9 +92,6 @@
                 <a href="/contact" class="group relative text-lg font-medium hover:text-blue-100 transition-all duration-300">
                     <i class="fas fa-envelope mr-2"></i>Contact
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
-                </a>
-                <a sec:authorize="isAnonymous()" href="/login" class="group relative text-lg font-medium hover:text-blue-100">
-                    <i class="fas fa-user mr-2"></i>Login
                 </a>
             </nav>
             <button id="mobileMenuButton" class="md:hidden p-2 rounded-xl bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all duration-200" aria-controls="mobileMenu" aria-expanded="false">
@@ -181,9 +176,8 @@
                     <!-- CRYSTAL CLEAR PRODUCT IMAGE -->
                     <img th:src="${product.imageUrl ?: '/images/default.webp'}"
                          th:alt="${product.name}"
-                         loading="lazy"
-                         decoding="async"
-                         class="w-full h-full object-cover object-center sharp-image transition-all duration-700 group-hover:scale-125"
+                         class="w-full h-full object-cover object-center sharp-image transition-all duration-700 group-hover:scale-125
+                                loading='lazy' decoding='async'"
                          style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; image-rendering: high-quality;">
 
                     <!-- Quick Actions -->
@@ -440,4 +434,3 @@
 </style>
 </body>
 </html>
-
