@@ -68,8 +68,8 @@ public class WishlistController {
         if (user == null) {
             return "redirect:/login";
         }
-
         wishlistService.removeItem(user, listId, itemId);
+
         return "redirect:/wishlists";
     }
 

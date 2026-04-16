@@ -2,7 +2,6 @@ package com.omar.ecommerce.controllers;
 
 import com.omar.ecommerce.entities.*;
 import com.omar.ecommerce.repositories.CartItemRepository;
-import com.omar.ecommerce.repositories.CartRepository;
 import com.omar.ecommerce.repositories.ProductRepository;
 import com.omar.ecommerce.repositories.UserRepository;
 import com.omar.ecommerce.services.CartService;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/cart")
@@ -41,7 +39,10 @@ public class CartController {
 
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         String username = userDetails.getUsername();
-        User user = userRepository.findByUsername(username).get();
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            return "redirect:/login";
+        }
 
 
         Cart cart = cartService.getOrCreateCart(user);
@@ -62,21 +63,39 @@ public class CartController {
 
     @PostMapping("/add")
     public String addCart(Authentication auth, @RequestParam("productId") long productId) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/login";
+        }
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         String username = userDetails.getUsername();
-        User user = userRepository.findByUsername(username).get();
-        Product product = productRepository.findById(productId).get();
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            return "redirect:/login";
+        }
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            return "redirect:/cart?missingProduct";
+        }
 
-        CartItem cartItem = cartService.addToCart(product, user);
+        cartService.addToCart(product, user);
         return "redirect:/cart";
     }
 
     @PostMapping("/decrease")
     public String decrease(Authentication auth, @RequestParam("productId") long productId) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/login";
+        }
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         String username = userDetails.getUsername();
-        User user = userRepository.findByUsername(username).get();
-        Product product = productRepository.findById(productId).get();
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            return "redirect:/login";
+        }
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            return "redirect:/cart?missingProduct";
+        }
 
         cartService.decreaseQuantity(user, product);
         return "redirect:/cart";
@@ -88,9 +107,12 @@ public class CartController {
             return "redirect:/login";
         }
 
-        User user = userRepository.findByUsername(principal.getUsername()).get();
-        Order order = orderService.checkOut(user);  // ✅ Uses OrderService
+        User user = userRepository.findByUsername(principal.getUsername()).orElse(null);
+        if (user == null) {
+            return "redirect:/login";
+        }
+        orderService.checkOut(user);
 
-        return "redirect:/thank";  // ✅ Redirects to ThankController
+        return "redirect:/thank";
     }
 }

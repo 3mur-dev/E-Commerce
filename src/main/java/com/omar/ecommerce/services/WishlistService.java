@@ -25,7 +25,6 @@ import java.util.UUID;
 public class WishlistService {
 
     private static final String DEFAULT_LIST_NAME = "Wishlist";
-    private static final int MAX_NOTE_LENGTH = 255;
 
     private final WishlistRepository wishlistRepository;
     private final WishlistItemRepository wishlistItemRepository;
@@ -86,7 +85,7 @@ public class WishlistService {
 
     @Transactional
     public WishlistItem addItem(User user, Long wishlistId, Long productId,
-                                Integer desiredQuantity, Integer priority, String note) {
+                                Integer desiredQuantity) {
         Wishlist wishlist = getUserWishlist(user, wishlistId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -108,59 +107,29 @@ public class WishlistService {
             item.setDesiredQuantity(normalizedQty);
         }
 
-        Integer normalizedPriority = normalizePriority(priority);
-        if (normalizedPriority != null) {
-            item.setPriority(normalizedPriority);
-        }
-
-        if (note != null) {
-            item.setNote(normalizeNote(note));
-        }
-
         return wishlistItemRepository.save(item);
     }
-
-    @Transactional
-    public WishlistItem updateItem(User user, Long itemId, Integer desiredQuantity,
-                                   Integer priority, String note) {
-        WishlistItem item = wishlistItemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Wishlist item not found"));
-        if (!item.getWishlist().getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Wishlist item not found");
-        }
-
-        Integer normalizedQty = normalizeDesiredQuantity(desiredQuantity);
-        if (normalizedQty != null) {
-            item.setDesiredQuantity(normalizedQty);
-        }
-
-        Integer normalizedPriority = normalizePriority(priority);
-        if (normalizedPriority != null) {
-            item.setPriority(normalizedPriority);
-        }
-
-        if (note != null) {
-            item.setNote(normalizeNote(note));
-        }
-
-        return wishlistItemRepository.save(item);
-    }
-
     @Transactional
     public void removeItem(User user, Long wishlistId, Long itemId) {
         Wishlist wishlist = getUserWishlist(user, wishlistId);
+
+        // Fetch the item to delete
         WishlistItem item = wishlistItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Wishlist item not found"));
+
+        // Ensure it belongs to the user
         if (!item.getWishlist().getId().equals(wishlist.getId())) {
             throw new RuntimeException("Wishlist item not found");
         }
+
+        // Delete from DB
         wishlistItemRepository.delete(item);
     }
 
     @Transactional
     public void addToDefaultList(User user, Long productId) {
         Wishlist defaultList = getOrCreateDefaultList(user);
-        addItem(user, defaultList.getId(), productId, null, null, null);
+        addItem(user, defaultList.getId(), productId, null);
     }
 
     @Transactional
@@ -198,9 +167,8 @@ public class WishlistService {
     private void mergeOtherLists(User user, Wishlist defaultList) {
         List<Wishlist> wishlists = wishlistRepository.findByUserIdOrderByIdAsc(user.getId());
         for (Wishlist other : wishlists) {
-            if (other.getId().equals(defaultList.getId())) {
-                continue;
-            }
+            if (other.getId().equals(defaultList.getId())) continue;
+
             List<WishlistItem> items = wishlistItemRepository.findByWishlistIdOrderByAddedAtDesc(other.getId());
             for (WishlistItem item : items) {
                 mergeItemIntoDefault(item, defaultList);
@@ -216,13 +184,6 @@ public class WishlistService {
         if (existing.isPresent()) {
             WishlistItem target = existing.get();
             target.setDesiredQuantity(target.getDesiredQuantity() + item.getDesiredQuantity());
-            if (target.getPriority() == null && item.getPriority() != null) {
-                target.setPriority(item.getPriority());
-            }
-            if ((target.getNote() == null || target.getNote().isBlank())
-                    && item.getNote() != null && !item.getNote().isBlank()) {
-                target.setNote(item.getNote());
-            }
             wishlistItemRepository.save(target);
             wishlistItemRepository.delete(item);
             return;
@@ -237,23 +198,5 @@ public class WishlistService {
             return null;
         }
         return desiredQuantity;
-    }
-
-    private Integer normalizePriority(Integer priority) {
-        if (priority == null) {
-            return null;
-        }
-        if (priority < 1) {
-            return 1;
-        }
-        return Math.min(priority, 5);
-    }
-
-    private String normalizeNote(String note) {
-        String trimmed = note.trim();
-        if (trimmed.length() > MAX_NOTE_LENGTH) {
-            return trimmed.substring(0, MAX_NOTE_LENGTH);
-        }
-        return trimmed;
     }
 }

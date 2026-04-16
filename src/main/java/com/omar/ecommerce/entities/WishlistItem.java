@@ -43,12 +43,6 @@ public class WishlistItem {
     @Column(name = "desired_quantity", nullable = false)
     private int desiredQuantity = 1;
 
-    @Column
-    private Integer priority;
-
-    @Column(length = 255)
-    private String note;
-
     @Column(name = "added_at", nullable = false)
     private LocalDateTime addedAt;
 

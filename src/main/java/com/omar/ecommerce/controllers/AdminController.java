@@ -194,20 +194,47 @@ public class AdminController {
         return "redirect:/admin/categories";
     }
     @PostMapping("/increase-stock/{id}")
-    public String increaseStock(@PathVariable Long id, @RequestParam int amount) {
-        productService.increaseStock(id, amount);
+    public String increaseStock(@PathVariable Long id, @RequestParam int amount, RedirectAttributes ra) {
+        if (amount <= 0) {
+            ra.addFlashAttribute("error", "Stock increase amount must be positive.");
+            return "redirect:/admin/products";
+        }
+        try {
+            productService.increaseStock(id, amount);
+            ra.addFlashAttribute("success", "Stock updated successfully.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/products";
     }
 
     @PostMapping("/decrease-stock/{id}")
-    public String decreaseStock(@PathVariable Long id, @RequestParam int amount) {
-        productService.decreaseStock(id, amount);
+    public String decreaseStock(@PathVariable Long id, @RequestParam int amount, RedirectAttributes ra) {
+        if (amount <= 0) {
+            ra.addFlashAttribute("error", "Stock decrease amount must be positive.");
+            return "redirect:/admin/products";
+        }
+        try {
+            productService.decreaseStock(id, amount);
+            ra.addFlashAttribute("success", "Stock updated successfully.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/products";
     }
 
     @PostMapping("/set-stock/{id}")
-    public String setStock(@PathVariable Long id, @RequestParam int quantity) {
-        productService.setStock(id, quantity);
+    public String setStock(@PathVariable Long id, @RequestParam int quantity, RedirectAttributes ra) {
+        if (quantity < 0) {
+            ra.addFlashAttribute("error", "Stock quantity cannot be negative.");
+            return "redirect:/admin/products";
+        }
+        try {
+            productService.setStock(id, quantity);
+            ra.addFlashAttribute("success", "Stock updated successfully.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/products";
     }
 
@@ -217,9 +244,19 @@ public class AdminController {
     @GetMapping("/orders")
     public String getAllOrders(@RequestParam(required = false) String status, Model model) {
         List<Order> orders;
+        String normalizedStatus = status == null ? null : status.trim();
+        OrderStatus statusEnum = null;
 
-        if (status != null && !status.isEmpty()) {
-            orders = orderService.getOrdersByStatus(OrderStatus.valueOf(status));
+        if (normalizedStatus != null && !normalizedStatus.isEmpty()) {
+            try {
+                statusEnum = OrderStatus.valueOf(normalizedStatus);
+            } catch (IllegalArgumentException ex) {
+                normalizedStatus = null;
+            }
+        }
+
+        if (statusEnum != null) {
+            orders = orderService.getOrdersByStatus(statusEnum);
         } else {
             orders = orderService.getAllOrders();
         }
@@ -240,7 +277,7 @@ public class AdminController {
         model.addAttribute("totalShipped", totalShipped);
         model.addAttribute("totalPending", totalPending);
         model.addAttribute("totalRevenue", totalRevenue);
-        model.addAttribute("status", status); // keep filter selected
+        model.addAttribute("status", normalizedStatus); // keep filter selected
 
         return "admin-orders";
     }

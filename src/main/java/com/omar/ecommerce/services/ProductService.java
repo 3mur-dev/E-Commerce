@@ -285,6 +285,9 @@ public class ProductService {
     Stock management
     */
     public void increaseStock(Long productId, int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Increase amount must be positive");
+        }
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         product.setStock(product.getStock() + amount);
@@ -292,6 +295,9 @@ public class ProductService {
     }
 
     public void decreaseStock(Long productId, int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Decrease amount must be positive");
+        }
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         int newQty = product.getStock() - amount;
@@ -300,6 +306,9 @@ public class ProductService {
     }
 
     public void setStock(Long productId, int newQuantity) {
+        if (newQuantity < 0) {
+            throw new IllegalArgumentException("Stock quantity cannot be negative");
+        }
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         product.setStock(newQuantity);

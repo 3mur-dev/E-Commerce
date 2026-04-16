@@ -92,15 +92,4 @@ public class CartService {
         }
         return total;
     }
-
-    // Alternative method using Java Streams
-    public BigDecimal calculateTotalPriceStreams(Cart cart) {
-        if (cart == null || cart.getItems() == null) {
-            return BigDecimal.ZERO;
-        }
-
-        return cart.getItems().stream()
-                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
 }

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- 🔥 FIXED: Proper Thymeleaf syntax for title -->
-    <title th:text="${param.admin != null} ? 'Admin Login - Omars Shop' : 'Login - Omars Shop'">Login - Omar's Shop</title>
+    <title th:text="${param.admin != null} ? 'Admin Login - Shoppio' : 'Login - Shoppio'">Login - Shoppio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
@@ -33,6 +33,7 @@
             66% { transform: translateY(15px) rotate(240deg); }
         }
     </style>
+    <link href="/css/polish.css" rel="stylesheet">
 </head>
 
 <body th:class="${param.admin != null} ? 'gradient-admin min-h-screen flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 relative overflow-x-hidden' : 'gradient-main min-h-screen flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 relative overflow-x-auto'">
@@ -159,32 +160,6 @@
                 <p class="text-sm">Invalid credentials. Please try again.</p>
             </div>
 
-            <div th:if="${param.verify == 'sent'}" class="mt-8 p-6 rounded-3xl bg-emerald-500/10 border-2 border-emerald-400/40 backdrop-blur-sm text-emerald-100">
-                <div class="flex items-center gap-3 mb-2">
-                    <i class="fas fa-envelope text-xl text-emerald-400"></i>
-                    <h3 class="font-bold text-lg">Verify Your Email</h3>
-                </div>
-                <p class="text-sm">Check your inbox for a verification link.</p>
-            </div>
-
-            <div th:if="${param.verify == 'required'}" class="mt-8 p-6 rounded-3xl bg-amber-500/10 border-2 border-amber-400/40 backdrop-blur-sm text-amber-100">
-                <div class="flex items-center gap-3 mb-2">
-                    <i class="fas fa-lock text-xl text-amber-300"></i>
-                    <h3 class="font-bold text-lg">Email Not Verified</h3>
-                </div>
-                <p class="text-sm">Please verify your email before signing in.</p>
-                <a href="/resend-verification" class="underline text-sm text-amber-100">Resend verification email</a>
-            </div>
-
-            <div th:if="${param.verify == 'failed'}" class="mt-8 p-6 rounded-3xl bg-red-500/10 border-2 border-red-400/40 backdrop-blur-sm text-red-100">
-                <div class="flex items-center gap-3 mb-2">
-                    <i class="fas fa-triangle-exclamation text-xl text-red-400"></i>
-                    <h3 class="font-bold text-lg">Verification Email Failed</h3>
-                </div>
-                <p class="text-sm">We could not send the verification email. Try resending.</p>
-                <a href="/resend-verification" class="underline text-sm text-red-100">Resend verification email</a>
-            </div>
-
             <div th:if="${param.logout}" class="mt-8 p-6 rounded-3xl bg-emerald-500/10 border-2 border-emerald-400/40 backdrop-blur-sm text-emerald-100">
                 <div class="flex items-center gap-3 mb-2">
                     <i class="fas fa-check-circle text-xl text-emerald-400"></i>
@@ -204,7 +179,8 @@
 </div>
 
 <footer class="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center text-white/50 text-xs md:text-sm">
-    <p>&copy; 2026 Omar's Shop</p>
+    <p>&copy; 2026 Shoppio </p>
 </footer>
 </body>
 </html>
+

@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -116,13 +115,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .successHandler(successHandler())
-                        .failureHandler((request, response, exception) -> {
-                            if (exception instanceof DisabledException) {
-                                response.sendRedirect("/login?verify=required");
-                                return;
-                            }
-                            response.sendRedirect("/login?error");
-                        })
+                        .failureHandler((request, response, exception) -> response.sendRedirect("/login?error"))
                         .permitAll()
                 )
                 .rememberMe(remember -> remember
