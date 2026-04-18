@@ -127,10 +127,10 @@ public class ProductService {
                     String imageUrl = uploadToCloudinary(image);
                     product.setImageUrl(imageUrl);
                 } else {
-                    Path uploadPath = resolveUploadPath(uploadDir);
+                    Path uploadPath = resolveUploadPath();
                     Files.createDirectories(uploadPath);
 
-                    String fileName = UUID.randomUUID() + getFileExtension(image);
+                    String fileName = UUID.randomUUID() + safeFileExtension(image);
                     Path filePath = uploadPath.resolve(fileName).normalize();
                     Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
@@ -156,24 +156,25 @@ public class ProductService {
 
     // Add these helper methods
     private String getUploadDirectory() {
-        return resolveUploadPath(uploadDir).toString();
+        return resolveUploadPath().toString();
     }
 
     /**
-     * Resolve configured upload directory safely under the application working directory.
+     * Resolve upload directory under the application working directory.
+     * Only allow known-safe base directories.
      */
-    private Path resolveUploadPath(String configuredUploadDir) {
-        String dir = (configuredUploadDir == null || configuredUploadDir.isBlank())
+    private Path resolveUploadPath() {
+        String configured = (uploadDir == null || uploadDir.isBlank())
                 ? "uploads"
-                : configuredUploadDir.trim();
+                : uploadDir.trim().replace('\\', '/');
+
+        String baseDir = switch (configured) {
+            case "uploads", "./uploads" -> "uploads";
+            default -> throw new IllegalArgumentException("Invalid upload directory configuration");
+        };
 
         Path appRoot = Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize();
-        Path resolvedBase = appRoot.resolve(dir).normalize();
-        if (!resolvedBase.startsWith(appRoot)) {
-            throw new IllegalArgumentException("Invalid upload directory configuration");
-        }
-
-        return resolvedBase.resolve("products").normalize();
+        return appRoot.resolve(baseDir).resolve("products").normalize();
     }
 
     private boolean isValidImage(MultipartFile file) {
@@ -186,13 +187,15 @@ public class ProductService {
                 file.getSize() <= maxSize;
     }
 
-    private String getFileExtension(MultipartFile file) {
-        String originalName = file.getOriginalFilename();
-        if (originalName == null) {
-            return ".jpg";
+    private String safeFileExtension(MultipartFile file) {
+        String contentType = file.getContentType();
+        if ("image/png".equals(contentType)) {
+            return ".png";
         }
-        String sanitized = Paths.get(originalName).getFileName().toString();
-        return sanitized.contains(".") ? sanitized.substring(sanitized.lastIndexOf(".")) : ".jpg";
+        if ("image/webp".equals(contentType)) {
+            return ".webp";
+        }
+        return ".jpg";
     }
 
     private boolean isCloudinaryEnabled() {
