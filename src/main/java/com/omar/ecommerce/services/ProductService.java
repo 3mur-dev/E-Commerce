@@ -127,7 +127,7 @@ public class ProductService {
                     String imageUrl = uploadToCloudinary(image);
                     product.setImageUrl(imageUrl);
                 } else {
-                    Path uploadPath = Paths.get(uploadDir, "products");
+                    Path uploadPath = resolveUploadPath(uploadDir);
                     Files.createDirectories(uploadPath);
 
                     String fileName = UUID.randomUUID() + getFileExtension(image);
@@ -156,7 +156,24 @@ public class ProductService {
 
     // Add these helper methods
     private String getUploadDirectory() {
-        return Paths.get(System.getProperty("user.dir"), "uploads", "products").toString();
+        return resolveUploadPath(uploadDir).toString();
+    }
+
+    /**
+     * Resolve configured upload directory safely under the application working directory.
+     */
+    private Path resolveUploadPath(String configuredUploadDir) {
+        String dir = (configuredUploadDir == null || configuredUploadDir.isBlank())
+                ? "uploads"
+                : configuredUploadDir.trim();
+
+        Path appRoot = Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize();
+        Path resolvedBase = appRoot.resolve(dir).normalize();
+        if (!resolvedBase.startsWith(appRoot)) {
+            throw new IllegalArgumentException("Invalid upload directory configuration");
+        }
+
+        return resolvedBase.resolve("products").normalize();
     }
 
     private boolean isValidImage(MultipartFile file) {

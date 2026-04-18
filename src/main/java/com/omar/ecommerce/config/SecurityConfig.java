@@ -18,6 +18,8 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.net.URI;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +43,8 @@ public class SecurityConfig {
             SavedRequest savedRequest = requestCache.getRequest(request, response);
             if (savedRequest != null) {
                 requestCache.removeRequest(request, response);
-                response.sendRedirect(savedRequest.getRedirectUrl());
+                String safeRedirect = resolveSafeRedirectUrl(request, savedRequest.getRedirectUrl());
+                response.sendRedirect(safeRedirect);
                 return;
             }
 
@@ -59,6 +62,52 @@ public class SecurityConfig {
                 response.sendRedirect("/products");
             }
         };
+    }
+
+    private String resolveSafeRedirectUrl(HttpServletRequest request, String candidateUrl) {
+        if (candidateUrl == null || candidateUrl.isBlank()) {
+            return "/products";
+        }
+
+        try {
+            URI uri = URI.create(candidateUrl);
+
+            if (uri.isAbsolute()) {
+                String scheme = uri.getScheme();
+                String host = uri.getHost();
+                int uriPort = uri.getPort() == -1
+                        ? ("https".equalsIgnoreCase(scheme) ? 443 : 80)
+                        : uri.getPort();
+                int requestPort = request.getServerPort();
+
+                boolean sameOrigin =
+                        request.getScheme().equalsIgnoreCase(scheme) &&
+                        request.getServerName().equalsIgnoreCase(host) &&
+                        requestPort == uriPort;
+
+                if (!sameOrigin) {
+                    return "/products";
+                }
+
+                String path = uri.getRawPath();
+                if (path == null || path.isBlank() || !path.startsWith("/") || path.startsWith("//")) {
+                    return "/products";
+                }
+
+                String query = uri.getRawQuery();
+                return query == null ? path : path + "?" + query;
+            }
+
+            String path = uri.getRawPath();
+            if (path == null || path.isBlank() || !path.startsWith("/") || path.startsWith("//")) {
+                return "/products";
+            }
+
+            String query = uri.getRawQuery();
+            return query == null ? path : path + "?" + query;
+        } catch (IllegalArgumentException ex) {
+            return "/products";
+        }
     }
 
     // Authentication Provider (Spring Security 6.x)
