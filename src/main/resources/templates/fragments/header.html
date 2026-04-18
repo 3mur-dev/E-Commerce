@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<body>
+<header th:fragment="storeHeader(activePage)"
+        th:with="isHome=${activePage == 'home'}, isProducts=${activePage == 'products'}, isCart=${activePage == 'cart'}, isWishlists=${activePage == 'wishlists'}"
+        class="gradient-card text-white shadow-2xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-4 py-5">
+            <a href="/" class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent whitespace-nowrap">
+                Shoppio
+            </a>
+
+            <form th:action="@{/products}" method="get"
+                  class="hidden md:flex flex-1 max-w-xl items-center gap-3 rounded-2xl bg-white/15 border border-white/20 px-4 py-2">
+                <i class="fas fa-search text-white/80"></i>
+                <input type="text"
+                       name="keyword"
+                       th:value="${keyword}"
+                       placeholder="Search products..."
+                       class="w-full bg-transparent text-white placeholder-white/70 outline-none"/>
+                <button type="submit"
+                        class="rounded-xl bg-white/20 hover:bg-white/30 px-3 py-1.5 text-sm font-semibold transition-colors">
+                    Search
+                </button>
+            </form>
+
+            <nav class="hidden lg:flex items-center gap-5 text-sm xl:text-base">
+                <a href="/"
+                   class="group relative font-medium transition-all duration-300"
+                   th:classappend="${isHome} ? ' text-blue-100 font-bold' : ' hover:text-blue-100'">
+                    <i class="fas fa-home mr-2"></i>Home
+                    <span class="absolute -bottom-1 left-0 h-0.5 bg-white transition-all duration-300"
+                          th:classappend="${isHome} ? ' w-full' : ' w-0 group-hover:w-full'"></span>
+                </a>
+                <a href="/products"
+                   class="group relative font-medium transition-all duration-300"
+                   th:classappend="${isProducts} ? ' text-blue-100 font-bold' : ' hover:text-blue-100'">
+                    <i class="fas fa-store mr-2"></i>Products
+                    <span class="absolute -bottom-1 left-0 h-0.5 bg-white transition-all duration-300"
+                          th:classappend="${isProducts} ? ' w-full' : ' w-0 group-hover:w-full'"></span>
+                </a>
+                <a href="/cart"
+                   class="group relative font-medium transition-all duration-300"
+                   th:classappend="${isCart} ? ' text-blue-100 font-bold' : ' hover:text-blue-100'">
+                    <i class="fas fa-shopping-cart mr-2"></i>Cart
+                    <span th:text="${cartCount > 99 ? '99+' : cartCount}"
+                          class="ml-1 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">0</span>
+                    <span class="absolute -bottom-1 left-0 h-0.5 bg-white transition-all duration-300"
+                          th:classappend="${isCart} ? ' w-full' : ' w-0 group-hover:w-full'"></span>
+                </a>
+                <a href="/wishlists"
+                   class="group relative font-medium transition-all duration-300"
+                   th:classappend="${isWishlists} ? ' text-blue-100 font-bold' : ' hover:text-blue-100'">
+                    <i class="fas fa-heart mr-2"></i>Wishlists
+                    <span class="absolute -bottom-1 left-0 h-0.5 bg-white transition-all duration-300"
+                          th:classappend="${isWishlists} ? ' w-full' : ' w-0 group-hover:w-full'"></span>
+                </a>
+                    <span class="absolute -bottom-1 left-0 h-0.5 w-0 bg-white transition-all duration-300 group-hover:w-full"></span>
+                </a>
+            </nav>
+
+            <div sec:authorize="isAnonymous()" class="hidden md:flex items-center gap-2 ml-auto">
+                <a href="/login" class="rounded-xl bg-white/20 hover:bg-white/30 px-4 py-2 text-sm font-semibold transition-colors">
+                    Login
+                </a>
+            </div>
+
+            <div sec:authorize="isAuthenticated()" class="hidden md:block relative ml-auto">
+                <button id="accountMenuButton"
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-xl bg-white/20 hover:bg-white/30 px-4 py-2 text-sm font-semibold transition-colors"
+                        aria-controls="accountMenu"
+                        aria-expanded="false">
+                    <i class="fas fa-user-circle"></i>
+                    <span sec:authentication="name">Account</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+
+                <div id="accountMenu" class="hidden absolute right-0 mt-2 w-52 rounded-2xl bg-white text-gray-800 shadow-2xl p-2 z-50">
+                    <a href="/cart" class="block rounded-xl px-3 py-2 text-sm hover:bg-gray-100 transition-colors">My Cart</a>
+                    <a href="/wishlists" class="block rounded-xl px-3 py-2 text-sm hover:bg-gray-100 transition-colors">My Wishlist</a>
+                    <a href="/contact" class="block rounded-xl px-3 py-2 text-sm hover:bg-gray-100 transition-colors">Support</a>
+                    <form th:action="@{/logout}" method="post" class="mt-1">
+                        <button type="submit" class="w-full text-left rounded-xl px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <button id="mobileMenuButton"
+                    class="lg:hidden p-2 rounded-xl bg-white/20 backdrop-blur-sm"
+                    aria-controls="mobileMenu"
+                    aria-expanded="false">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+
+        <nav id="mobileMenu" class="lg:hidden hidden pb-4">
+            <div class="flex flex-col gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+                <form th:action="@{/products}" method="get" class="flex items-center gap-2 rounded-xl bg-white/15 border border-white/20 px-3 py-2">
+                    <i class="fas fa-search text-white/80"></i>
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Search products..."
+                           class="w-full bg-transparent text-white placeholder-white/70 outline-none"/>
+                </form>
+
+                <a href="/" th:classappend="${isHome} ? ' text-white font-semibold' : ' text-white/90'"><i class="fas fa-home mr-2"></i>Home</a>
+                <a href="/products" th:classappend="${isProducts} ? ' text-white font-semibold' : ' text-white/90'"><i class="fas fa-store mr-2"></i>Products</a>
+                <a href="/cart" th:classappend="${isCart} ? ' text-white font-semibold' : ' text-white/90'">
+                    <i class="fas fa-shopping-cart mr-2"></i>Cart
+                    <span th:text="${cartCount > 99 ? '99+' : cartCount}" class="ml-1 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">0</span>
+                </a>
+                <a href="/wishlists" th:classappend="${isWishlists} ? ' text-white font-semibold' : ' text-white/90'"><i class="fas fa-heart mr-2"></i>Wishlists</a>
+
+                <div sec:authorize="isAnonymous()" class="mt-2 border-t border-white/20 pt-3 space-y-2">
+                    <a href="/login" class="block text-white/90"><i class="fas fa-user mr-2"></i>Login</a>
+                </div>
+                <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="mt-2 border-t border-white/20 pt-3">
+                    <button type="submit" class="w-full text-left text-white/90"><i class="fas fa-right-from-bracket mr-2"></i>Logout</button>
+                </form>
+            </div>
+        </nav>
+    </div>
+</header>
+</body>
+</html>

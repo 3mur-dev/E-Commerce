@@ -4,18 +4,24 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.omar.ecommerce.dtos.ProductRequest;
 import com.omar.ecommerce.dtos.ProductResponse;
+import com.omar.ecommerce.dtos.ProductSearchRequest;
 import com.omar.ecommerce.entities.Category;
 import com.omar.ecommerce.entities.Product;
+import com.omar.ecommerce.entities.User;
+import com.omar.ecommerce.mapper.ProductMapper;
 import com.omar.ecommerce.repositories.CategoryRepository;
 import com.omar.ecommerce.repositories.FavoriteRepository;
 import com.omar.ecommerce.repositories.ProductRepository;
 import com.omar.ecommerce.repositories.WishlistItemRepository;
+import com.omar.ecommerce.util.ProductSpecification;
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +35,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,6 +46,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final FavoriteRepository favoriteRepository;
     private final WishlistItemRepository wishlistItemRepository;
+    private final ProductMapper productMapper;
 
     @Value("${app.upload-dir:uploads}")
     private String uploadDir;
@@ -64,6 +72,7 @@ public class ProductService {
 
         return productPage.map(this::mapToResponse);
     }
+
     public Page<ProductResponse> searchByName(String keyword, String sort, int page) {
         Sort.Direction direction = sort.isEmpty() ? Sort.Direction.ASC :
                 (sort.endsWith(",desc") ? Sort.Direction.DESC : Sort.Direction.ASC);
@@ -81,10 +90,12 @@ public class ProductService {
         resp.setId(product.getId());
         resp.setName(product.getName());
         resp.setPrice(product.getPrice());
-        resp.setCategoryId(product.getCategory().getId());
+        if (product.getCategory() != null) {
+            resp.setCategoryId(product.getCategory().getId());
+            resp.setCategoryName(product.getCategory().getName());
+        }
         resp.setStock(product.getStock());
         resp.setImageUrl(product.getImageUrl());
-        resp.setDeleted(Boolean.TRUE.equals(product.getDeleted()));
         return resp;
     }
 
@@ -273,7 +284,6 @@ public class ProductService {
     }
 
 
-
     public List<ProductResponse> searchByName(String keyword) {
         return productRepository.findByNameContainingIgnoreCase(keyword)
                 .stream()
@@ -313,5 +323,75 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         product.setStock(newQuantity);
         productRepository.save(product);
+    }
+
+    public Page<ProductResponse> search(ProductSearchRequest req) {
+        sanitizeSearchRequest(req);
+
+        // 1. Build dynamic filters
+        Specification<Product> spec = ProductSpecification.build(req);
+
+        // 2. Build sorting
+        Sort sort = buildSort(req);
+
+        // 3. Build pagination
+        Pageable pageable = PageRequest.of(req.getPage(), req.getSize(), sort);
+
+        // 4. Execute query
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
+
+        // 5. Map to response DTO
+        return productPage.map(productMapper::toResponse);
+    }
+
+    private Sort buildSort(ProductSearchRequest req) {
+        String sortBy = switch ((req.getSortBy() == null ? "" : req.getSortBy().trim().toLowerCase())) {
+            case "name" -> "name";
+            case "price" -> "price";
+            case "stock" -> "stock";
+            default -> "id";
+        };
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(req.getSortDir())
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        return Sort.by(direction, sortBy);
+    }
+
+    private void sanitizeSearchRequest(ProductSearchRequest req) {
+        if (req.getPage() < 0) {
+            req.setPage(0);
+        }
+
+        if (req.getSize() <= 0 || req.getSize() > 48) {
+            req.setSize(12);
+        }
+
+        if (req.getKeyword() != null) {
+            req.setKeyword(req.getKeyword().trim());
+        }
+
+        if (req.getMinPrice() != null && req.getMinPrice().compareTo(BigDecimal.ZERO) < 0) {
+            req.setMinPrice(BigDecimal.ZERO);
+        }
+
+        if (req.getMaxPrice() != null && req.getMaxPrice().compareTo(BigDecimal.ZERO) < 0) {
+            req.setMaxPrice(BigDecimal.ZERO);
+        }
+
+        if (req.getMinPrice() != null && req.getMaxPrice() != null
+                && req.getMinPrice().compareTo(req.getMaxPrice()) > 0) {
+            BigDecimal originalMin = req.getMinPrice();
+            req.setMinPrice(req.getMaxPrice());
+            req.setMaxPrice(originalMin);
+        }
+    }
+
+    public ProductResponse findById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
+        return mapToResponse(product);
     }
 }

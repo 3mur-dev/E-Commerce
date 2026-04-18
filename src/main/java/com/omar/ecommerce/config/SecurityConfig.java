@@ -87,6 +87,7 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/images/**",
                                 "/products**",
+                                "/products/**",
                                 "/contact",
                                 "/contact.html",
                                 "/contact/**",
@@ -106,7 +107,10 @@ public class SecurityConfig {
                                 "/support/",
                                 "/support.html",
                                 "/support/**",
-                                "/wishlists/shared/**"
+                                "/wishlists/shared/**",
+                                "/products/details",
+                                "/products/details/",
+                                "/products/details/**"
                         ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/cart/**", "/orders/**", "/order-summary").authenticated()

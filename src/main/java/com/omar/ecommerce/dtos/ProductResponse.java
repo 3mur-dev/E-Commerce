@@ -13,9 +13,12 @@ public class ProductResponse {
     private Long id;
     private String name;
     private BigDecimal price;
+
     private Long categoryId;
+    private String categoryName;
+
     private int stock;
-    private boolean deleted;
-    private boolean favorited = false;
     private String imageUrl;
+
+    private boolean isFavorited;
 }

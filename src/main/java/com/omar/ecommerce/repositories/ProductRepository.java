@@ -4,6 +4,7 @@ import com.omar.ecommerce.entities.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +12,8 @@ import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>,
+        JpaSpecificationExecutor<Product> {
 
     // Search active products by name (list)
     @Query("SELECT p FROM Product p WHERE COALESCE(p.deleted, false) = false AND LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")

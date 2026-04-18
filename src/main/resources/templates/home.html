@@ -33,62 +33,7 @@
 <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
 
 <!-- Header -->
-<header class="gradient-card text-white shadow-2xl sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center py-6">
-            <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
-                Shoppio
-            </h1>
-            <nav class="hidden md:flex space-x-8">
-                <a href="/" class="group relative text-lg font-medium text-blue-100 font-bold">
-                    <i class="fas fa-home mr-2"></i>Home
-                    <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-white"></span>
-                </a>
-                <a href="/products" class="group relative text-lg font-medium hover:text-blue-100">
-                    <i class="fas fa-store mr-2"></i>Products
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
-                </a>
-                <a href="/cart" class="group relative text-lg font-medium hover:text-blue-100">
-                    <i class="fas fa-shopping-cart mr-2"></i>Cart
-                    <span class="ml-1 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">0</span>
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
-                </a>
-                <a href="/wishlists" class="group relative text-lg font-medium hover:text-blue-100">
-                    <i class="fas fa-heart mr-2"></i>Wishlists
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
-                </a>
-                <a href="/about" target="_blank" class="group relative text-lg font-medium hover:text-blue-100">
-                    <i class="fas fa-info-circle mr-2"></i>About
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
-                </a>
-                <a href="/contact" target="_blank" class="group relative text-lg font-medium hover:text-blue-100">
-                    <i class="fas fa-envelope mr-2"></i>Contact
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
-                </a>
-                <a sec:authorize="isAnonymous()" href="/login" class="group relative text-lg font-medium hover:text-blue-100">
-                    <i class="fas fa-user mr-2"></i>Login
-                </a>
-
-            </nav>
-            <button id="mobileMenuButton" class="md:hidden p-2 rounded-xl bg-white/20 backdrop-blur-sm" aria-controls="mobileMenu" aria-expanded="false">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-        </div>
-        <nav id="mobileMenu" class="md:hidden hidden pb-4">
-            <div class="flex flex-col gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4">
-                <a href="/" class="text-white font-semibold"><i class="fas fa-home mr-2"></i>Home</a>
-                <a href="/products" class="text-white/90"><i class="fas fa-store mr-2"></i>Products</a>
-                <a href="/cart" class="text-white/90"><i class="fas fa-shopping-cart mr-2"></i>Cart</a>
-                <a href="/wishlists" class="text-white/90"><i class="fas fa-heart mr-2"></i>Wishlists</a>
-                <a href="/about" class="text-white/90"><i class="fas fa-info-circle mr-2"></i>About</a>
-                <a href="/contact" class="text-white/90"><i class="fas fa-envelope mr-2"></i>Contact</a>
-                <a sec:authorize="isAnonymous()" href="/login" class="text-white/90 mt-2 border-t border-white/20 pt-2">
-                    <i class="fas fa-user mr-2"></i>Login
-                </a>
-            </div>
-        </nav>
-    </div>
-</header>
+<th:block th:replace="~{fragments/header :: storeHeader('home')}"></th:block>
 
 <!-- Hero Section -->
 <section class="relative overflow-hidden pt-24 pb-32">
@@ -160,7 +105,9 @@
         <div class="mt-4 space-x-6">
             <a href="/privacy" class="hover:text-blue-100 transition-colors duration-200">Privacy</a>
             <a href="/terms" class="hover:text-blue-100 transition-colors duration-200">Terms</a>
+            <a href="/about" class="hover:text-blue-100 transition-colors duration-200">About</a>
             <a href="/support" class="hover:text-blue-100 transition-colors duration-200">Support</a>
+            <a href="/contact" class="transition hover:text-white">Contact</a>
         </div>
     </div>
 </footer>
@@ -172,6 +119,23 @@
             mobileMenu.classList.toggle('hidden');
             const expanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
             mobileMenuButton.setAttribute('aria-expanded', String(!expanded));
+        });
+    }
+
+    const accountMenuButton = document.getElementById('accountMenuButton');
+    const accountMenu = document.getElementById('accountMenu');
+    if (accountMenuButton && accountMenu) {
+        accountMenuButton.addEventListener('click', () => {
+            accountMenu.classList.toggle('hidden');
+            const expanded = accountMenuButton.getAttribute('aria-expanded') === 'true';
+            accountMenuButton.setAttribute('aria-expanded', String(!expanded));
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!accountMenu.contains(event.target) && !accountMenuButton.contains(event.target)) {
+                accountMenu.classList.add('hidden');
+                accountMenuButton.setAttribute('aria-expanded', 'false');
+            }
         });
     }
 </script>
