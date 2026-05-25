@@ -1,0 +1,35 @@
+app = "ecommerce-3mur"
+primary_region = "fra"
+
+[build]
+  builder = "docker"
+
+[env]
+  PORT = "8080"
+  MAIL_USERNAME = ""
+  MAIL_PASSWORD = ""
+  MAIL_FROM = "noreply@ecommerce.com"
+  UPLOAD_DIR = "/app/uploads"
+
+# Set DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET, STRIPE_SECRET_KEY, and STRIPE_WEBHOOK_SECRET via Fly secrets.
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+  processes = ["app"]
+  
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 100
+    soft_limit = 80
+
+[[mounts]]
+  source = "uploads"
+  destination = "/app/uploads"

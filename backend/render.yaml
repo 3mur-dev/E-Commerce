@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: ecommerce
+    env: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: RESET_BASE_URL
+        sync: false
+      - key: VERIFY_BASE_URL
+        sync: false
+      - key: SPRING_DATA_REDIS_URL
+        fromService:
+          type: redis
+          name: ecommerce-redis
+          property: connectionString
+
+  - type: redis
+    name: ecommerce-redis
+    region: frankfurt
+    plan: free

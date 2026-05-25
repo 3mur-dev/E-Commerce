@@ -1,0 +1,10 @@
+# Added to prevent accidental credential commits
+application-dev.properties
+.env
+.env.local
+target/
+uploads/
+target/
+.idea/
+.codex/
+*.iml
