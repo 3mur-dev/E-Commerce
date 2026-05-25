@@ -1,6 +1,85 @@
 # Shoppio
 
-Shoppio is a full-stack ecommerce project with a React storefront, an admin dashboard, and a Spring Boot API for authentication, catalog management, cart, checkout, orders, wishlist, and admin operations.
+Shoppio is a full-stack ecommerce application built to demonstrate production-style product thinking, not just isolated CRUD screens. It combines a polished customer storefront, a secure admin workspace, and a Spring Boot API that handles authentication, catalog management, cart flows, checkout, orders, wishlist management, and operational tooling.
+
+This project is designed to show the kind of work a client, recruiter, or hiring team would expect from a developer who can build across the stack and think beyond the happy path.
+
+## Why This Project Stands Out
+
+- End-to-end ecommerce workflow from browsing products to placing orders
+- Role-based admin system for managing products, orders, and users
+- JWT-based authentication with protected routes and admin-only APIs
+- Stripe checkout and webhook support for real payment integration patterns
+- PostgreSQL persistence with Flyway migrations for maintainable schema evolution
+- Redis caching and Actuator health endpoints for more realistic backend operations
+- Frontend and backend split cleanly into separate apps with a clear local dev workflow
+
+## What It Demonstrates
+
+- Building a modern React frontend and a Spring Boot backend that work together cleanly
+- Designing APIs for both customer-facing and admin-facing experiences
+- Implementing security, validation, and protected access in a practical business app
+- Structuring a repo so it is easy to develop, test, deploy, and extend
+- Thinking about reliability through health checks, migrations, caching, and test coverage
+
+## Core Product Areas
+
+### Customer Experience
+
+- Landing page and storefront browsing
+- Product details flow
+- Registration, login, and email verification
+- Cart management and checkout
+- Order history and order details
+- Wishlist support
+
+### Admin Experience
+
+- Dashboard with revenue and operational metrics
+- Product management
+- Order management and status updates
+- User management with role and status controls
+
+### Platform and Backend Capabilities
+
+- JWT authentication and Spring Security authorization rules
+- Swagger / OpenAPI docs for API discoverability
+- Flyway migrations for schema management
+- Redis-backed caching
+- Stripe webhook processing
+- Actuator health and readiness endpoints
+
+## Tech Stack
+
+### Frontend
+
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- TanStack Query
+- React Router
+
+### Backend
+
+- Java 17
+- Spring Boot 3
+- Spring Security
+- Spring Data JPA
+- PostgreSQL
+- Redis
+- Flyway
+- Stripe
+- Springdoc OpenAPI
+- Actuator
+
+### Testing and Tooling
+
+- JUnit and Spring Boot Test
+- Testcontainers
+- Vitest
+- ESLint
+- Docker Compose
 
 ## Project Structure
 
@@ -11,54 +90,54 @@ Shoppio/
 \- docker-compose.yaml
 ```
 
-- `backend`: Java 17, Spring Boot, PostgreSQL, Redis, Stripe, Flyway, Swagger, Actuator
-- `frontend`: React, TypeScript, Vite, Tailwind CSS, TanStack Query, React Router
+- `backend` contains the API, database integration, security, business logic, and migrations
+- `frontend` contains the storefront and admin UI
+- `docker-compose.yaml` provides a quick local setup for PostgreSQL and Redis
 
-See the service-specific docs for more detail:
+More detailed service-level documentation:
 
 - [backend/README.md](backend/README.md)
 - [frontend/README.md](frontend/README.md)
 
-## Features
+## Engineering Highlights
 
-- Customer storefront with product browsing and details
-- Authentication and email verification
-- Cart, checkout, and order history
-- Wishlist support
-- Admin dashboard for products, orders, and users
-- Stripe checkout and webhook handling
-- Redis-backed caching and Flyway migrations
+- Security is enforced with stateless JWT authentication and role-based access for admin endpoints
+- API documentation is available through Swagger UI and OpenAPI output
+- Database schema changes are versioned under `backend/src/main/resources/db/migration`
+- Health, readiness, and observability endpoints are exposed through Spring Actuator
+- Backend tests cover controllers, services, Redis configuration, Stripe webhooks, and repository integration
+- The frontend uses a separate Vite app with local API proxying for a cleaner development experience
 
-## Prerequisites
+## Local Development
+
+### Prerequisites
 
 - Java 17
 - Node.js 18+ and npm
 - Docker Desktop or local PostgreSQL and Redis
 
-## Local Development
-
 ### 1. Start infrastructure
 
-If you want to use Docker for local services, start Postgres and Redis from the repository root:
+From the repository root:
 
 ```bash
 docker compose up -d postgres redis
 ```
 
-That provides:
+This starts:
 
 - PostgreSQL on `localhost:5432`
 - Redis on `localhost:6379`
 
 ### 2. Configure the backend
 
-Use the example environment file in `backend`:
+Create the backend environment file from the example:
 
 ```bash
 cp backend/.env.example backend/.env
 ```
 
-Required values you should review before starting:
+Review these required values:
 
 - `DB_URL`
 - `DB_USERNAME`
@@ -88,7 +167,7 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-On Windows PowerShell, you can also use:
+Windows PowerShell:
 
 ```powershell
 cd backend
@@ -97,9 +176,7 @@ cd backend
 
 The API runs on `http://localhost:8080`.
 
-### 3. Configure and run the frontend
-
-Install dependencies and start Vite:
+### 3. Run the frontend
 
 ```bash
 cd frontend
@@ -109,7 +186,7 @@ npm run dev
 
 The frontend runs on `http://localhost:5173`.
 
-During local development, Vite proxies `/api` and `/images` to the backend on port `8080`.
+During development, Vite proxies `/api` and `/images` to the backend on port `8080`.
 
 ## Useful URLs
 
@@ -119,7 +196,7 @@ During local development, Vite proxies `/api` and `/images` to the backend on po
 - OpenAPI spec: `http://localhost:8080/v3/api-docs`
 - Health check: `http://localhost:8080/actuator/health`
 
-## Testing and Quality Checks
+## Quality Checks
 
 Backend:
 
@@ -139,9 +216,10 @@ npm run build
 
 ## Deployment Notes
 
-- The backend includes a production `Dockerfile` in `backend/Dockerfile`.
-- Database schema changes are managed with Flyway migrations under `backend/src/main/resources/db/migration`.
-- Redis, Stripe, mail, and image upload integrations depend on environment configuration.
+- The backend includes a production Dockerfile in `backend/Dockerfile`
+- PostgreSQL schema changes are managed with Flyway migrations
+- Redis, Stripe, mail, and image upload behavior depend on environment configuration
+- The repository is structured so frontend and backend can be deployed independently
 
 ## License
 
