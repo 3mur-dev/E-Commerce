@@ -1,4 +1,4 @@
-# Shoppio
+# 🛒Shoppio > Built to simulate a real-world SaaS e-commerce system with authentication, payments, admin tools, and scalable backend architecture.
 
 Shoppio is a full-stack ecommerce application built to demonstrate production-style product thinking, not just isolated CRUD screens. It combines a polished customer storefront, a secure admin workspace, and a Spring Boot API that handles authentication, catalog management, cart flows, checkout, orders, wishlist management, and operational tooling.
 
