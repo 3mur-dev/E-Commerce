@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Heart, House, ShoppingCart, Share2, Trash2 } from "lucide-react";
+import { Heart, House, ShoppingCart, Trash2 } from "lucide-react";
 import { API_BASE, formatPrice, getAuthHeaders, resolveAssetUrl } from "../../api";
 import toast from "react-hot-toast";
 import { PageBackground, PageFooter } from "../extra/PageLayout";
@@ -166,28 +166,6 @@ const handleRemoveFromWishlist = async (productId: number) => {
 };
 
   const items = wishlist?.items ?? [];
-  const shareUrl =
-    wishlist?.shareToken ? `${window.location.origin}/wishlists/shared/${wishlist.shareToken}` : null;
-
-  const copyShareLink = async () => {
-    if (!shareUrl) {
-        try {
-          toast.error("This wishlist does not have a share link yet.");
-        } catch {}
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-        try {
-          toast.success("Share link copied to clipboard.");
-        } catch {}
-    } catch {
-        try {
-          toast.error(shareUrl);
-        } catch {}
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
