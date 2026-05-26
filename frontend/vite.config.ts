@@ -6,11 +6,11 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        target: "https://shoppioapi.onrender.com/api",
         changeOrigin: true,
       },
       "/images": {
-        target: "http://localhost:8080",
+        target: "https://shoppioapi.onrender.com/images",
         changeOrigin: true,
       },
     },
