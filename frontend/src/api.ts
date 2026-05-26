@@ -111,22 +111,6 @@ export const getAuthHeaders = (): Record<string, string> => {
 
   return headers;
 };
-
-async function parseError(response: Response): Promise<string> {
-  const text = await response.text().catch(() => "");
-
-  if (!text) {
-    return `Request failed with status ${response.status}`;
-  }
-
-  try {
-    const parsed = JSON.parse(text) as { message?: string; error?: string };
-    return parsed.message || parsed.error || text;
-  } catch {
-    return text;
-  }
-}
-
 export async function fetchCart(): Promise<CartResponse> {
   const response = await fetch(`${API_BASE}/cart`, {
     headers: getAuthHeaders(),
