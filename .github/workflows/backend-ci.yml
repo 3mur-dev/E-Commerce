@@ -33,7 +33,7 @@ jobs:
           cache: maven
 
       - name: Build and verify
-        run: ./mvnw -B clean verify
+        run: bash ./mvnw -B clean verify
 
       - name: Test Summary
         if: success()
