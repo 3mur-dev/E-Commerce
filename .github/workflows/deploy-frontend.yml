@@ -16,6 +16,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to Vercel
+    env:
+      VERCEL_ORG_ID: team_aIsMzsOUfUKfuGzCDcNSe0LG
+      VERCEL_PROJECT_ID: prj_XEmM6lOyFRol20eAlOetsLU6B3FJ
 
     steps:
       - name: Checkout
@@ -24,11 +27,9 @@ jobs:
       - name: Validate Vercel secrets
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
-            echo "Missing required Vercel secrets."
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "Missing required Vercel token."
             exit 1
           fi
 
@@ -53,9 +54,6 @@ jobs:
       - name: Deploy to Vercel
         working-directory: frontend
         run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Notify deployment
         if: success()
