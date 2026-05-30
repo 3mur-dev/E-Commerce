@@ -52,7 +52,7 @@ jobs:
         run: npm run build
 
       - name: Deploy to Vercel
-        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
+        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Notify deployment
         if: success()
